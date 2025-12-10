@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.connection.driver_class">org.mariadb.jdbc.Driver</property>
+        <!--<property name="hibernate.connection.url">jdbc:mariadb://172.18.1.241:3306/ISDD_007</property>-->
+        <!--<property name="hibernate.connection.username">ISDD_007</property>-->
+        <!--<property name="hibernate.connection.password">ISDD_007</property>-->  
+        <property name="hibernate.show_sql">true</property>
+        <mapping class="Models.Trainer"/>
+        <mapping class="Models.Activity"/>
+        <mapping class="Models.Client"/>
+
+
+    </session-factory>
+</hibernate-configuration> 
