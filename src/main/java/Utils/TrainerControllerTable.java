@@ -4,10 +4,8 @@
  */
 package Utils;
 
-
-
-
 import Models.Trainer;
+import Models.TrainerDAO;
 import Views.MainWindow;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -20,10 +18,37 @@ public class TrainerControllerTable {
 
     private final SessionFactory sessionFactory;
     private final MainWindow view;
+    private final TrainerDAO trainerDAO = new TrainerDAO(); // Zakładam, że masz DAO        
 
     public TrainerControllerTable(SessionFactory sessionFactory, MainWindow view) {
         this.sessionFactory = sessionFactory;
         this.view = view;
+    }
+
+    public Trainer getSelectedTrainer() {
+        String trainerId = view.getSelectedTrainerCode(); // Używamy metody z MainWindow
+
+        if (trainerId == null) {
+            return null;
+        }
+
+        Session session = null;
+        Trainer trainer = null;
+        try {
+            session = sessionFactory.openSession();
+            // Używamy DAO do znalezienia obiektu po ID
+            // TrainerDAO musi mieć metodę findById lub findByCode
+            trainer = trainerDAO.returnTrainerByID(session, trainerId);
+            // Zakładam, że TrainerDAO ma metodę findTrainerById
+
+        } catch (Exception e) {
+            System.err.println("Błąd pobierania Trenera: " + e.getMessage());
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return trainer;
     }
 
     public void showTrainers() {
@@ -53,7 +78,9 @@ public class TrainerControllerTable {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } finally {
-            if (session != null && session.isOpen()) session.close();
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 }

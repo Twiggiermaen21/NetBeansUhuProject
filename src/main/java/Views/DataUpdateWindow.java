@@ -342,6 +342,42 @@ public Object getFormattedData() {
     return jFormattedData.getValue(); // To zwróci sparsowaną datę (jeśli formatowanie działa)
     // Dla prostoty, można by to po prostu zwrócić jako String: jFormattedData.getText();
 }
+public void setKod(String kod) {
+    jKod.setText(kod);
+}
+
+public void setNazwisko(String nazwisko) {
+    jNazwisko.setText(nazwisko);
+}
+
+public void setNumerIdentyfikacyjny(String numer) {
+    jNumer.setText(numer);
+}
+
+public void setTelefon(String telefon) {
+    jTelefon.setText(telefon);
+}
+
+public void setEmail(String email) {
+    jEmail.setText(email);
+}
+
+public void setKategoria(String kategoria) {
+    jKategoria.setText(kategoria);
+}
+
+public void setNick(String nick) {
+    jNick.setText(nick);
+}
+
+/**
+ * Ustawia wartość JFormattedTextField. Należy ustawiać sparsowany obiekt (np. Date lub LocalDate).
+ */
+public void setFormattedData(Object data) {
+    jFormattedData.setValue(data);
+}
+
+
 
 // --- Metody do podpinania ActionListenerów (dodaj te metody) ---
 public void addAkceptujListener(java.awt.event.ActionListener al) {

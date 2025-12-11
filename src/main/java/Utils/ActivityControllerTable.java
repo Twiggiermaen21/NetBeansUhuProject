@@ -10,6 +10,7 @@ package Utils;
  */
 
 import Models.Activity;
+import Models.ActivityDAO;
 import Views.MainWindow;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -27,12 +28,36 @@ public class ActivityControllerTable {
 
     private final SessionFactory sessionFactory;
     private final MainWindow view;
-
+private final ActivityDAO activityDAO = new ActivityDAO(); // Zakładam, że masz DAO
     public ActivityControllerTable(SessionFactory sessionFactory, MainWindow view) {
         this.sessionFactory = sessionFactory;
         this.view = view;
     }
-
+public Activity getSelectedActivity() {
+        String activityId = view.getSelectedActivityCode(); // Używamy metody z MainWindow
+        
+        if (activityId == null) {
+            return null;
+        }
+        
+        Session session = null;
+        Activity activity = null;
+        try {
+            session = sessionFactory.openSession();
+            // Używamy DAO do znalezienia obiektu po ID
+            // ActivityDAO musi mieć metodę findById lub findByCode
+            activity = activityDAO.findActivityById(session, activityId); 
+            // Zakładam, że ActivityDAO ma metodę findActivityById
+            
+        } catch (Exception e) {
+            System.err.println("Błąd pobierania Aktywności: " + e.getMessage());
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return activity;
+    }
     public void showActivities() {
         Session session = null;
         try {

@@ -52,13 +52,13 @@ public class ActivityController {
             System.out.print("Enter activity ID: ");
             String aId = keyboard.nextLine();
 
-            boolean exists = aDAO.existActivityID(session, aId);
+            boolean exists = aDAO.existAId(session, aId);
             if (!exists) {
                 vMessages.consoleMessage("ERROR", "Activity ID not found.");
                 return;
             }
 
-            Activity activity = aDAO.returnActivityByID(session, aId);
+            Activity activity = aDAO.findActivityById(session, aId);
             if (activity == null) {
                 vMessages.consoleMessage("ERROR", "Activity retrieval failed.");
                 return;

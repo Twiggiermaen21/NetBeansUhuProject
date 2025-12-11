@@ -331,11 +331,26 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 public String getSelectedClientCode() {
-    int selectedRow = dataTable.getSelectedRow();
-    if (selectedRow == -1) {
-        return null;
+        Object value = getSelectedValueAt(0); // Zakładamy, że ID jest w kolumnie 0
+        return (value != null) ? value.toString() : null;
     }
-    // Zakładamy, że Kod Członkowski (mNum) jest w kolumnie o indeksie 0 (pierwsza kolumna)
-    return (String) dataTable.getValueAt(selectedRow, 0); 
-}
+
+    /**
+     * Zwraca kod Trenera (ID) z zaznaczonego wiersza.
+     * Zakłada, że Kod Trenera jest w kolumnie 0.
+     */
+    public String getSelectedTrainerCode() {
+        Object value = getSelectedValueAt(0); // Zakładamy, że ID jest w kolumnie 0
+        return (value != null) ? value.toString() : null;
+    }
+
+    /**
+     * Zwraca kod Aktywności (ID) z zaznaczonego wiersza.
+     * Zakłada, że Kod Aktywności jest w kolumnie 0.
+     */
+    public String getSelectedActivityCode() {
+        Object value = getSelectedValueAt(0); // Zakładamy, że ID jest w kolumnie 0
+        return (value != null) ? value.toString() : null;
+    }
+    
 }
