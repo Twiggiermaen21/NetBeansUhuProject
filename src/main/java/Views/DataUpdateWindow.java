@@ -4,6 +4,9 @@
  */
 package Views;
 
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+
 /**
  *
  * @author kacpe
@@ -33,20 +36,18 @@ public class DataUpdateWindow extends javax.swing.JFrame {
         jNazwisko = new javax.swing.JTextField();
         jNumer = new javax.swing.JTextField();
         jTelefon = new javax.swing.JTextField();
-        jNick = new javax.swing.JTextField();
         jEmail = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jAkceptuj = new javax.swing.JButton();
         jAnuluj = new javax.swing.JButton();
-        jFormattedData = new javax.swing.JFormattedTextField();
-        jKategoria = new javax.swing.JTextField();
+        jFormattedData = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
+        jKategoria = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -75,12 +76,6 @@ public class DataUpdateWindow extends javax.swing.JFrame {
             }
         });
 
-        jNick.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jNickActionPerformed(evt);
-            }
-        });
-
         jEmail.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
         jEmail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -98,15 +93,23 @@ public class DataUpdateWindow extends javax.swing.JFrame {
 
         jLabel5.setText("Data Przyjęcia/Wejścia");
 
-        jLabel6.setText("Nick/Pseudonim");
-
         jLabel7.setText("Numer Identyfikacyjny");
 
+        jAkceptuj.setBackground(new java.awt.Color(51, 255, 0));
+        jAkceptuj.setForeground(new java.awt.Color(0, 0, 0));
         jAkceptuj.setText("Akceptuj");
 
+        jAnuluj.setBackground(new java.awt.Color(255, 0, 0));
+        jAnuluj.setForeground(new java.awt.Color(0, 0, 0));
         jAnuluj.setText("Anuluj");
 
-        jFormattedData.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("20/06/2003"))));
+        jFormattedData.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jFormattedDataActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setText("Kategoria");
 
         jKategoria.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -114,61 +117,43 @@ public class DataUpdateWindow extends javax.swing.JFrame {
             }
         });
 
-        jLabel8.setText("Kategoria");
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(19, 19, 19)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel1))
-                        .addGap(48, 48, 48)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jKod, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jNazwisko, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                    .addComponent(jLabel6)
-                                    .addGap(41, 41, 41))
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel7)
-                                        .addComponent(jLabel3)
-                                        .addComponent(jLabel4))
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addGap(12, 12, 12))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel8)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jNumer)
-                            .addComponent(jTelefon)
-                            .addComponent(jEmail)
-                            .addComponent(jNick)
-                            .addComponent(jFormattedData)
-                            .addComponent(jKategoria))))
-                .addGap(105, 105, 105)
+                .addGap(27, 27, 27)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jAkceptuj, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jAnuluj, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(19, Short.MAX_VALUE))
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jAkceptuj, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(29, 29, 29)
+                        .addComponent(jAnuluj, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jKategoria, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                        .addComponent(jFormattedData)
+                        .addComponent(jEmail, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jTelefon, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jNumer, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jNazwisko, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jKod, javax.swing.GroupLayout.Alignment.TRAILING)))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(47, 47, 47)
+                .addGap(44, 44, 44)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jKod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jKod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -180,37 +165,31 @@ public class DataUpdateWindow extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTelefon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3)
-                    .addComponent(jAkceptuj))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(jFormattedData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addComponent(jAnuluj)))
+                    .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jNick, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addGap(9, 9, 9)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jFormattedData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addGap(9, 9, 9)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jKategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8))
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jAnuluj)
+                    .addComponent(jAkceptuj))
+                .addContainerGap(9, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 516, Short.MAX_VALUE)
+            .addGap(0, 546, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addContainerGap()
@@ -219,7 +198,7 @@ public class DataUpdateWindow extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGap(0, 302, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addContainerGap()
@@ -246,13 +225,13 @@ public class DataUpdateWindow extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTelefonActionPerformed
 
-    private void jNickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jNickActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jNickActionPerformed
-
     private void jEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jEmailActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jEmailActionPerformed
+
+    private void jFormattedDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedDataActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jFormattedDataActionPerformed
 
     private void jKategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jKategoriaActionPerformed
         // TODO add your handling code here:
@@ -287,19 +266,17 @@ public class DataUpdateWindow extends javax.swing.JFrame {
     public javax.swing.JButton jAkceptuj;
     public javax.swing.JButton jAnuluj;
     public javax.swing.JTextField jEmail;
-    public javax.swing.JFormattedTextField jFormattedData;
+    public javax.swing.JTextField jFormattedData;
     public javax.swing.JTextField jKategoria;
     public javax.swing.JTextField jKod;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
+    public javax.swing.JLabel jLabel1;
+    public javax.swing.JLabel jLabel2;
+    public javax.swing.JLabel jLabel3;
+    public javax.swing.JLabel jLabel4;
+    public javax.swing.JLabel jLabel5;
+    public javax.swing.JLabel jLabel7;
+    public javax.swing.JLabel jLabel8;
     public javax.swing.JTextField jNazwisko;
-    public javax.swing.JTextField jNick;
     public javax.swing.JTextField jNumer;
     private javax.swing.JPanel jPanel1;
     public javax.swing.JTextField jTelefon;
@@ -333,13 +310,11 @@ public String getKategoria() {
 }
 
 // Póki co Nick i Data zostawmy jako String, dla uproszczenia
-public String getNick() {
-    return jNick.getText();
-}
+
 
 // Data jest w JFormattedTextField
 public Object getFormattedData() {
-    return jFormattedData.getValue(); // To zwróci sparsowaną datę (jeśli formatowanie działa)
+    return jFormattedData.getText(); // To zwróci sparsowaną datę (jeśli formatowanie działa)
     // Dla prostoty, można by to po prostu zwrócić jako String: jFormattedData.getText();
 }
 public void setKod(String kod) {
@@ -363,21 +338,35 @@ public void setEmail(String email) {
 }
 
 public void setKategoria(String kategoria) {
-    jKategoria.setText(kategoria);
+    // UŻYWA jKategoria1, a NIE jFormattedData
+    jKategoria.setText(kategoria); 
 }
 
-public void setNick(String nick) {
-    jNick.setText(nick);
-}
+
 
 /**
  * Ustawia wartość JFormattedTextField. Należy ustawiać sparsowany obiekt (np. Date lub LocalDate).
  */
-public void setFormattedData(Object data) {
-    jFormattedData.setValue(data);
+public void setFormattedData(String data) {
+    jFormattedData.setText(data);
 }
-
-
+public void setFieldLabels(String labelNazwisko, String labelNumer, String labelTelefon, 
+                               String labelEmail, String labelData, String labelKategoria) {
+        jLabel2.setText(labelNazwisko);
+        jLabel7.setText(labelNumer);
+        jLabel3.setText(labelTelefon);
+        jLabel4.setText(labelEmail);
+        jLabel5.setText(labelData);
+        jLabel8.setText(labelKategoria);
+        // jLabel6 jest dla Nicku, który jest oddzielony, więc go tu nie ma.
+    }
+public void setFieldVisible(Object field, boolean visible) {
+        if (field instanceof JLabel label) {
+            label.setVisible(visible);
+        } else if (field instanceof JTextField textField) {
+            textField.setVisible(visible);
+        }
+    }
 
 // --- Metody do podpinania ActionListenerów (dodaj te metody) ---
 public void addAkceptujListener(java.awt.event.ActionListener al) {

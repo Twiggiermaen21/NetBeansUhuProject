@@ -1,33 +1,41 @@
 package Controllers;
 
-import Views.MainWindow;
 import Config.HibernateUtil;
-import Models.Activity;
-import Models.ActivityDAO;
-import Models.Client;
-import org.hibernate.SessionFactory;
-import Utils.*;
-import Models.ClientDAO;
-import Models.Trainer;
-import Models.TrainerDAO;
+import Models.*;
 import Views.DataUpdateWindow;
+import Views.MainWindow;
+import Utils.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+/**
+ * Główny Kontroler aplikacji. Zarządza przełączaniem widoków tabelarycznych
+ * oraz koordynuje operacje CRUD (dodawanie, edycja, usuwanie)
+ * dla encji Client, Trainer i Activity.
+ */
 public class MainController implements ActionListener {
+
+    private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
     private final SessionFactory sessionFactory;
     private final MainWindow view;
+    
+    // Obiekty DAO używane do operacji usuwania
     private final ClientDAO clientDAO = new ClientDAO();
-    private final TrainerDAO trainerDAO = new TrainerDAO(); // <--- DODANO
+    private final TrainerDAO trainerDAO = new TrainerDAO();
     private final ActivityDAO activityDAO = new ActivityDAO();
+    
     private String currentView = "Init";
-    // Kontrolery widoków tabelarycznych
+
+    // Kontrolery podrzędne zarządzające widokami tabelarycznymi
     private final ClientControllerTable clientControllerTable;
     private final TrainerControllerTable trainerControllerTable;
     private final ActivityControllerTable activityControllerTable;
@@ -47,8 +55,9 @@ public class MainController implements ActionListener {
         addListeners();
         addWindowCloseListener();
 
-        showInit();
+        showInit(); // Pokaż widok początkowy
         view.setVisible(true);
+        LOGGER.info("Główne okno aplikacji uruchomione.");
 
         setCrudButtonsVisible(false);
     }
@@ -57,7 +66,7 @@ public class MainController implements ActionListener {
     // OBSŁUGA LISTENERÓW (PODPINANIE AKCJI)
     // =========================================================================
     private void addListeners() {
-        // Listenery dla pozycji Menu (obsługiwane przez actionPerformed(this))
+        // Listenery dla pozycji Menu (zmiana widoku tabeli)
         view.addClientMenuListener(this);
         view.addTrainerMenuListener(this);
         view.addActivitiesMenuListener(this);
@@ -69,50 +78,61 @@ public class MainController implements ActionListener {
         view.addAktualizujListener(new ActionListenerForUpdateButton());
     }
 
+    /**
+     * Zapewnia czyste zamknięcie zasobów Hibernate przy zamknięciu okna.
+     */
     private void addWindowCloseListener() {
         view.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                HibernateUtil.close();
+                LOGGER.info("Zamykanie okna. Zamykanie SessionFactory.");
+                HibernateUtil.close(); // Czyści zasoby DB
                 System.exit(0);
             }
         });
     }
 
     // =========================================================================
-    // ACTION PERFORMED (OBSŁUGA MENU)
+    // ACTION PERFORMED (OBSŁUGA MENU) - ZMIANA WIDOKU
     // =========================================================================
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
             case "ShowClients" -> {
                 clientControllerTable.showClients();
+                view.setButtonLabels("Dodaj Klienta", "Usuń Klienta", "Edytuj Klienta");
                 setCrudButtonsVisible(true);
-                currentView = "Client"; // <--- DODANO
+                currentView = "Client";
+                LOGGER.info("Przełączono na widok: Klienci.");
             }
             case "ShowTrainers" -> {
                 trainerControllerTable.showTrainers();
+                view.setButtonLabels("Dodaj Trenera", "Usuń Trenera", "Edytuj Trenera");
                 setCrudButtonsVisible(true);
-                currentView = "Trainer"; // <--- DODANO
+                currentView = "Trainer";
+                LOGGER.info("Przełączono na widok: Trenerzy.");
             }
             case "ShowActivities" -> {
                 activityControllerTable.showActivities();
+                view.setButtonLabels("Dodaj Aktywność", "Usuń Aktywność", "Edytuj Aktywność");
                 setCrudButtonsVisible(true);
-                currentView = "Activity"; // <--- DODANO
+                currentView = "Activity";
+                LOGGER.info("Przełączono na widok: Aktywności.");
             }
             case "ShowInit" -> {
                 showInit();
-                currentView = "Init"; // <--- DODANO
+                view.setButtonLabels("Nowy", "Usuń", "Aktualizuj"); // Reset etykiet
+                currentView = "Init";
+                LOGGER.info("Przełączono na widok: Początkowy.");
             }
         }
-
     }
 
     // =========================================================================
-    // LOGIKA WIDOKU
+    // LOGIKA WIDOKU I STEROWANIE WIDOCZNOŚCIĄ
     // =========================================================================
     private void showInit() {
-        view.setTableData(new String[]{"Info"}, new Object[][]{{"Welcome to ISDD Project"}});
+        view.setTableData(new String[]{"Info"}, new Object[][]{{"Witaj w systemie zarządzania ISDD"}});
         setCrudButtonsVisible(false);
     }
 
@@ -123,54 +143,48 @@ public class MainController implements ActionListener {
     }
 
     // =========================================================================
-    // LOGIKA OBSŁUGI FORMULARZY (DODAWANIE I EDYCJA)
+    // LOGIKA OBSŁUGI FORMULARZY (DODAWANIE I EDYCJA) - DELEGACJA
     // =========================================================================
     /**
      * Ujednolicona metoda otwierająca formularz dodawania/edycji.
+     * Wybiera odpowiedni kontroler danych w zależności od typu encji.
      *
-     * @param client Klient do edycji lub null dla trybu dodawania.
+     * @param entity Encja do edycji lub null dla trybu dodawania.
+     * @param type Typ encji ("Client", "Trainer", "Activity")
      */
-   private void handleFormAction(Object entity) {
+    private void handleFormAction(Object entity, String type) {
         
         DataUpdateWindow form = new DataUpdateWindow();
         Object formController = null;
         String title;
         
-        // Określenie typu formularza i kontrolera
-        if (entity == null || entity instanceof Client) {
-            // Logika dla Klienta (Dodawanie - null, lub Edycja - Client)
-            Client client = (Client) entity;
-            formController = new ClientDataController(
-                sessionFactory, form, clientControllerTable, client
-            );
-            title = (client == null) ? "Dodawanie Nowego Klienta" : "Edycja Klienta: " + client.getMNum();
-            
-        } else if (entity instanceof Trainer) {
-            // Logika dla Trenera
-            Trainer trainer = (Trainer) entity;
-            formController = new TrainerDataController(
-                sessionFactory, form, trainerControllerTable, trainer
-            );
-            title = (trainer == null) ? "Dodawanie Nowego Trenera" : "Edycja Trenera: " + trainer.getTCod();
-            
-        } else if (entity instanceof Activity) {
-            // Logika dla Aktywności
-            Activity activity = (Activity) entity;
-            formController = new ActivityDataController(
-                sessionFactory, form, activityControllerTable, activity
-            );
-            title = (activity == null) ? "Dodawanie Nowej Aktywności" : "Edycja Aktywności: " + activity.getAId();
-            
-        } else {
-             // Jeśli nie jest to obsługiwany typ
-            JOptionPane.showMessageDialog(view, "Nieznany typ encji do obsługi formularza.", "Błąd", JOptionPane.ERROR_MESSAGE);
-            return;
+        boolean isAdding = (entity == null);
+        
+        // Określenie i utworzenie odpowiedniego kontrolera formularza
+        switch (type) {
+            case "Client" -> {
+                Client client = isAdding ? null : (Client) entity;
+                formController = new ClientDataController(sessionFactory, form, clientControllerTable, client);
+                title = isAdding ? "Dodawanie Nowego Klienta" : "Edycja Klienta: " + client.getMNum();
+            }
+            case "Trainer" -> {
+                Trainer trainer = isAdding ? null : (Trainer) entity;
+                formController = new TrainerDataController(sessionFactory, form, trainerControllerTable, trainer);
+                title = isAdding ? "Dodawanie Nowego Trenera" : "Edycja Trenera: " + trainer.getTCod();
+            }
+            case "Activity" -> {
+                Activity activity = isAdding ? null : (Activity) entity;
+                formController = new ActivityDataController(sessionFactory, form, activityControllerTable, activity);
+                title = isAdding ? "Dodawanie Nowej Aktywności" : "Edycja Aktywności: " + activity.getAId();
+            }
+            default -> {
+                 JOptionPane.showMessageDialog(view, "Nieznany typ encji do obsługi formularza.", "Błąd", JOptionPane.ERROR_MESSAGE);
+                 return;
+            }
         }
 
-        // Musimy założyć, że wszystkie kontrolery formularzy (ClientDataController, 
-        // TrainerDataController, ActivityDataController) implementują interfejs 
-        // lub mają metodę `initializeForm()`
-        
+        // Musimy uruchomić logikę inicjalizacji w nowym kontrolerze
+        // Użycie instancjowania (instanceof) z rzutowaniem jest poprawnym wzorcem w Java 16+
         if (formController instanceof ClientDataController clientCtrl) {
             clientCtrl.initializeForm();
         } else if (formController instanceof TrainerDataController trainerCtrl) {
@@ -187,22 +201,23 @@ public class MainController implements ActionListener {
     // =========================================================================
     // LISTENERY CRUD (WŁAŚCIWA LOGIKA BIZNESOWA)
     // =========================================================================
-   private class ActionListenerForAddButton implements ActionListener {
+
+    /** Obsługa przycisku DODAJ (NOWY). */
+    private class ActionListenerForAddButton implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+            LOGGER.fine("Kliknięto przycisk DODAJ dla widoku: " + currentView);
             switch (currentView) {
-                case "Client" -> handleFormAction(null); // NULL dla dodawania Klienta
-                case "Trainer" -> handleFormAction(null); // NULL dla dodawania Trenera
-                case "Activity" -> handleFormAction(null); // NULL dla dodawania Aktywności
+                case "Client" -> handleFormAction(null, "Client");
+                case "Trainer" -> handleFormAction(null, "Trainer");
+                case "Activity" -> handleFormAction(null, "Activity");
                 default -> JOptionPane.showMessageDialog(view, "Nie można dodać elementu w widoku początkowym.", "Błąd", JOptionPane.WARNING_MESSAGE);
             }
         }
     }
 
-    
-
-    // DEDYKOWANY LISTENER DLA AKTUALIZACJI
-   private class ActionListenerForUpdateButton implements ActionListener {
+    /** Obsługa przycisku AKTUALIZUJ (EDYTUJ). */
+    private class ActionListenerForUpdateButton implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             Object entityToEdit = null;
@@ -214,11 +229,11 @@ public class MainController implements ActionListener {
                     warningMessage = "Proszę zaznaczyć klienta do edycji.";
                 }
                 case "Trainer" -> {
-                    entityToEdit = trainerControllerTable.getSelectedTrainer(); // Zakładam istnienie tej metody
+                    entityToEdit = trainerControllerTable.getSelectedTrainer(); 
                     warningMessage = "Proszę zaznaczyć trenera do edycji.";
                 }
                 case "Activity" -> {
-                    entityToEdit = activityControllerTable.getSelectedActivity(); // Zakładam istnienie tej metody
+                    entityToEdit = activityControllerTable.getSelectedActivity(); 
                     warningMessage = "Proszę zaznaczyć aktywność do edycji.";
                 }
                 default -> {
@@ -233,17 +248,18 @@ public class MainController implements ActionListener {
             }
 
             // Przechodzi do ujednoliconej logiki otwierania formularza w trybie edycji
-            handleFormAction(entityToEdit);
+            handleFormAction(entityToEdit, currentView);
         }
     }
 
-   private class ActionListenerForUsunButton implements ActionListener {
+    /** Obsługa przycisku USUŃ. */
+    private class ActionListenerForUsunButton implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             
-            String codeToDelete = null; // Kod/ID do usunięcia
+            String codeToDelete = null; 
             String entityName = null;
-            Object entityController = null;
+            Object entityController = null; // Do odświeżenia
 
             switch (currentView) {
                 case "Client" -> {
@@ -252,12 +268,12 @@ public class MainController implements ActionListener {
                     entityController = clientControllerTable;
                 }
                 case "Trainer" -> {
-                    codeToDelete = view.getSelectedTrainerCode(); // Zakładam istnienie tej metody
+                    codeToDelete = view.getSelectedTrainerCode(); 
                     entityName = "Trener";
                     entityController = trainerControllerTable;
                 }
                 case "Activity" -> {
-                    codeToDelete = view.getSelectedActivityCode(); // Zakładam istnienie tej metody
+                    codeToDelete = view.getSelectedActivityCode(); 
                     entityName = "Aktywność";
                     entityController = activityControllerTable;
                 }
@@ -272,19 +288,19 @@ public class MainController implements ActionListener {
                 return;
             }
 
-            // Ujednolicone okno potwierdzenia
+            // Potwierdzenie usunięcia
             int confirm = JOptionPane.showConfirmDialog(view,
                 "Czy na pewno chcesz usunąć " + entityName.toLowerCase() + " o kodzie: " + codeToDelete + "?\nTej operacji nie można cofnąć.",
                 "Potwierdzenie usunięcia", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                // Ujednolicone wywołanie metody usuwającej
                 deleteEntity(currentView, codeToDelete, entityController);
             }
         }
     }
 
-    // Wyodrębniona metoda dla logiki usuwania klienta
+    /** * Wyodrębniona metoda dla ujednoliconej logiki usuwania encji z bazy.
+     */
     private void deleteEntity(String entityType, String codeToDelete, Object controller) {
         Session session = null;
         Transaction tr = null;
@@ -303,8 +319,8 @@ public class MainController implements ActionListener {
             // Wywołanie odpowiedniej metody DAO w zależności od typu
             deleted = switch (entityType) {
                 case "Client" -> clientDAO.deleteClientByMemberNumber(session, codeToDelete);
-                case "Trainer" -> trainerDAO.deleteTrainerById(session, codeToDelete); // Zakładam istnienie tej metody
-                case "Activity" -> activityDAO.deleteActivityById(session, codeToDelete); // Zakładam istnienie tej metody
+                case "Trainer" -> trainerDAO.deleteTrainerById(session, codeToDelete); 
+                case "Activity" -> activityDAO.deleteActivityById(session, codeToDelete); 
                 default -> false;
             };
 
@@ -330,6 +346,7 @@ public class MainController implements ActionListener {
             if (tr != null && tr.isActive()) {
                 tr.rollback();
             }
+            LOGGER.log(Level.SEVERE, "Błąd bazy danych podczas usuwania encji: " + entityType + " (" + codeToDelete + ")", ex);
             JOptionPane.showMessageDialog(view, "Błąd bazy danych podczas usuwania: " + ex.getMessage(), "Błąd DB", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (session != null && session.isOpen()) {

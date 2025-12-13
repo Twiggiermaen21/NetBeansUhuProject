@@ -1,13 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Utils;
-
-/**
- *
- * @author kacpe
- */
 
 import Models.Activity;
 import Models.ActivityDAO;
@@ -16,41 +7,58 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Kontroler odpowiedzialny za pobieranie i prezentację danych encji Activity
+ * w głównym oknie aplikacji (MainWindow).
+ */
 public class ActivityControllerTable {
     
-
-
-
-
+    private static final Logger LOGGER = Logger.getLogger(ActivityControllerTable.class.getName());
 
     private final SessionFactory sessionFactory;
     private final MainWindow view;
-private final ActivityDAO activityDAO = new ActivityDAO(); // Zakładam, że masz DAO
+    private final ActivityDAO activityDAO = new ActivityDAO();
+
+    // =========================================================================
+    // KONSTRUKTOR
+    // =========================================================================
+    
     public ActivityControllerTable(SessionFactory sessionFactory, MainWindow view) {
         this.sessionFactory = sessionFactory;
         this.view = view;
     }
-public Activity getSelectedActivity() {
-        String activityId = view.getSelectedActivityCode(); // Używamy metody z MainWindow
+
+    // =========================================================================
+    // POBIERANIE POJEDYNCZEJ ENCJ (DO EDYCJI)
+    // =========================================================================
+
+    /**
+     * Pobiera pełny obiekt Activity na podstawie kodu zaznaczonego w tabeli.
+     * Używane przez MainController przed uruchomieniem formularza edycji.
+     * * @return Obiekt Activity lub null, jeśli nic nie zaznaczono lub wystąpił błąd.
+     */
+    public Activity getSelectedActivity() {
+        String activityId = view.getSelectedActivityCode(); 
         
-        if (activityId == null) {
-            return null;
+        if (activityId == null || activityId.trim().isEmpty()) {
+            return null; // Nic nie zaznaczono
         }
         
         Session session = null;
         Activity activity = null;
         try {
             session = sessionFactory.openSession();
-            // Używamy DAO do znalezienia obiektu po ID
-            // ActivityDAO musi mieć metodę findById lub findByCode
+            // Delegowanie faktycznego pobrania obiektu do DAO
             activity = activityDAO.findActivityById(session, activityId); 
-            // Zakładam, że ActivityDAO ma metodę findActivityById
             
         } catch (Exception e) {
-            System.err.println("Błąd pobierania Aktywności: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Błąd pobierania Aktywności o ID: " + activityId, e);
+            // Nie wyświetlamy błędu, tylko logujemy, ponieważ to metoda pomocnicza.
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
@@ -58,14 +66,26 @@ public Activity getSelectedActivity() {
         }
         return activity;
     }
+    
+    // =========================================================================
+    // WYŚWIETLANIE WSZYSTKICH DANYCH (READ)
+    // =========================================================================
+
+    /**
+     * Pobiera wszystkie Aktywności z bazy danych i ustawia dane w tabeli głównego widoku.
+     */
     public void showActivities() {
         Session session = null;
         try {
             session = sessionFactory.openSession();
+            
+            // 1. Pobranie danych za pomocą HQL
             Query<Activity> query = session.createQuery("FROM Activity", Activity.class);
             List<Activity> activities = query.getResultList();
+            LOGGER.info("Pobrano " + activities.size() + " aktywności.");
 
-            String[] columns = {"ID", "NAME", "DESCRIPTION", "PRICE", "DAY", "HOUR", "TRAINER"};
+            // 2. Przygotowanie danych do tabeli Swing
+            String[] columns = {"ID", "Nazwa", "Opis/Typ", "Cena", "Dzień", "Godzina", "Trener"};
             Object[][] data = new Object[activities.size()][7];
 
             for (int i = 0; i < activities.size(); i++) {
@@ -76,14 +96,17 @@ public Activity getSelectedActivity() {
                 data[i][3] = a.getAPrice();
                 data[i][4] = a.getADay();
                 data[i][5] = a.getAHour();
+                // Pokazanie nazwy Trenera lub "N/A"
                 data[i][6] = a.getAtrainerInCharge() != null ? a.getAtrainerInCharge().getTName() : "N/A";
             }
 
+            // 3. Aktualizacja widoku
             view.setViewName("Activities");
             view.setTableData(columns, data);
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(view, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, "Błąd podczas wyświetlania listy Aktywności.", ex);
+            JOptionPane.showMessageDialog(view, "Błąd pobierania danych: " + ex.getMessage(), "Błąd DB", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (session != null && session.isOpen()) session.close();
         }

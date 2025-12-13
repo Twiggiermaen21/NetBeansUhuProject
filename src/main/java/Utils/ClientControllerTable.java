@@ -6,13 +6,22 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Kontroler odpowiedzialny za pobieranie i prezentację danych encji Client
+ * w głównym oknie aplikacji (MainWindow). Przechowuje listę obiektów w pamięci
+ * dla szybkich operacji edycji i usuwania.
+ */
 public class ClientControllerTable {
     
+    private static final Logger LOGGER = Logger.getLogger(ClientControllerTable.class.getName());
+    
     // Pola klasy
-    private List<Client> currentClients; // Przechowuje pełne obiekty Klientów po pobraniu
+    private List<Client> currentClients; 
     private final SessionFactory sessionFactory;
     private final MainWindow view;
 
@@ -21,7 +30,9 @@ public class ClientControllerTable {
         this.view = view;
     }
     
-    // Usunięto niekompletną metodę showClientsNew()
+    // =========================================================================
+    // WYŚWIETLANIE WSZYSTKICH DANYCH (READ)
+    // =========================================================================
 
     /**
      * Pobiera klientów z bazy, odświeża tabelę w widoku i zapisuje listę do pamięci.
@@ -32,12 +43,13 @@ public class ClientControllerTable {
             session = sessionFactory.openSession();
             Query<Client> query = session.createQuery("FROM Client", Client.class);
             List<Client> clients = query.getResultList();
+            LOGGER.info("Pobrano " + clients.size() + " klientów.");
 
             // Zapisz listę klientów, aby później móc pobrać pełny obiekt do edycji/usuwania
             this.currentClients = clients; 
 
             // Mapowanie danych do tabeli (View)
-            String[] columns = {"NUM", "NAME", "ID", "PHONE", "EMAIL", "START DATE", "CATEGORY"};
+            String[] columns = {"NUM", "Nazwisko/Imię", "ID (PESEL/DNI)", "Telefon", "E-mail", "Data Przyjęcia", "Kategoria"};
             Object[][] data = new Object[clients.size()][7];
 
             for (int i = 0; i < clients.size(); i++) {
@@ -55,22 +67,29 @@ public class ClientControllerTable {
             view.setTableData(columns, data);
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(view, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, "Błąd podczas wyświetlania listy Klientów.", ex);
+            JOptionPane.showMessageDialog(view, "Błąd pobierania danych: " + ex.getMessage(), "Błąd DB", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (session != null && session.isOpen()) session.close();
         }
     }
     
+    // =========================================================================
+    // POBIERANIE ZAZNACZONEJ ENCJ (DO EDYCJI/USUWANIA)
+    // =========================================================================
+
     /**
-     * Zwraca obiekt Client na podstawie zaznaczonego wiersza w tabeli.
-     * Używane do edycji/usuwania.
+     * Zwraca obiekt Client na podstawie indeksu zaznaczonego wiersza w tabeli.
+     * * @return Zaznaczony obiekt Client lub null, jeśli nic nie zaznaczono.
      */
     public Client getSelectedClient() {
-        // Zakładamy, że w MainWindow masz metodę getSelectedRow()
         int selectedRow = view.getSelectedRow(); 
+        
         if (selectedRow != -1 && currentClients != null && selectedRow < currentClients.size()) {
+            LOGGER.info("Pobrano klienta z wiersza: " + selectedRow);
             return currentClients.get(selectedRow);
         }
+        LOGGER.fine("Nie zaznaczono żadnego klienta.");
         return null;
     }
 }

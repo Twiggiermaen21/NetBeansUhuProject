@@ -3,8 +3,17 @@ package Models;
 import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Data Access Object (DAO) dla encji Trainer.
+ * Odpowiada za bezpośrednią interakcję z bazą danych dla Trenerów.
+ */
 public class TrainerDAO {
+
+    private static final Logger LOGGER = Logger.getLogger(TrainerDAO.class.getName());
 
     public TrainerDAO() {
     }
@@ -14,40 +23,29 @@ public class TrainerDAO {
     // =========================================================================
 
     /**
-     * Wstawia nowego Trenera do bazy danych (operacja DODAJ).
-     *
-     * @param session Sesja Hibernate.
-     * @param trainer Obiekt Trenera do zapisania.
+     * Wstawia nowego Trenera do bazy danych.
      */
     public void insertTrainer(Session session, Trainer trainer) {
         session.persist(trainer);
     }
 
     /**
-     * Aktualizuje istniejącego Trenera w bazie danych (operacja EDYTUJ).
-     * W nowszym Hibernate, persist/merge jest używane do zarządzania stanem.
-     *
-     * @param session Sesja Hibernate.
-     * @param trainer Obiekt Trenera ze zaktualizowanymi danymi.
+     * Aktualizuje istniejącego Trenera.
      */
     public void updateTrainer(Session session, Trainer trainer) {
-        session.merge(trainer); // Użycie merge do upewnienia się, że obiekt jest w stanie zarządzanym
+        session.merge(trainer);
     }
     
     /**
-     * Usuwa Trenera na podstawie jego ID (klucza głównego).
-     *
-     * @param session Sesja Hibernate.
-     * @param trainerId ID Trenera do usunięcia.
-     * @return true, jeśli usunięto, false, jeśli Trener nie istniał.
+     * Usuwa Trenera na podstawie klucza głównego (tCod).
+     * @return true, jeśli usunięto, false, jeśli Trener nie istnieje.
      */
     public boolean deleteTrainerById(Session session, String trainerId) {
-        // Najpierw spróbujmy pobrać obiekt, aby sprawdzić, czy istnieje
-        // W Twoim przypadku: szukamy po kluczu głównym
-        Trainer trainerToDelete = session.get(Trainer.class, trainerId); 
+        // ZMIANA: Używamy find() zamiast przestarzałego get()
+        Trainer trainerToDelete = session.find(Trainer.class, trainerId); 
         
         if (trainerToDelete != null) {
-            session.remove(trainerToDelete); // Użycie session.remove() jest poprawne
+            session.remove(trainerToDelete);
             return true;
         }
         return false;
@@ -58,40 +56,81 @@ public class TrainerDAO {
     // METODY WYSZUKIWANIA / WALIDACJI
     // =========================================================================
 
+    /**
+     * Sprawdza, czy numer identyfikacyjny Trenera (tidNumber) już istnieje.
+     * @return true, jeśli rekord istnieje, false w przeciwnym razie.
+     */
     public boolean existTrainerID(Session session, String id) {
         try {
-            // Zakładamy, że 'tidNumber' to numer identyfikacyjny (DNI/ID) Trenera,
-            // który musi być unikalny, ale niekoniecznie kluczem głównym.
+            // Szukamy po unikalnym numerze ID (TidNumber)
             Query<Trainer> q = session.createQuery("SELECT t FROM Trainer t WHERE t.tidNumber = :tidNumber", Trainer.class);
             q.setParameter("tidNumber", id);
-            Trainer t = q.getSingleResult();
-            return t != null;
-        } catch (NoResultException e) {
+            
+            // ZMIANA: Użycie getSingleResultOrNull() jest czystsze
+            Trainer result = q.getSingleResultOrNull(); 
+            return result != null;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Błąd podczas sprawdzania istnienia ID Trenera: " + id, e);
             return false;
         }
     }
 
-
+    /**
+     * Zwraca obiekt Trenera na podstawie klucza głównego (tCod).
+     *
+     * @param trainerCod Kod Trenera (klucz główny tCod).
+     * @return Obiekt Trenera lub null, jeśli nie znaleziono.
+     */
+    public Trainer getTrainerByCod(Session session, String trainerCod) {
+        // ZMIANA: Używamy find() zamiast przestarzałego get()
+        return session.find(Trainer.class, trainerCod); 
+    }
+    
+    /**
+     * Pobiera Trenera po unikalnym Numerze ID (TidNumber).
+     * * @return Obiekt Trenera lub null, jeśli nie znaleziono.
+     */
     public Trainer returnTrainerByID(Session session, String id) {
         try {
-            // W zależności od struktury Trainer (jeśli 'tidNumber' jest unikalny)
             Query<Trainer> q = session.createQuery("SELECT t FROM Trainer t WHERE t.tidNumber = :tidNumber", Trainer.class);
             q.setParameter("tidNumber", id);
-            return q.getSingleResult();
-        } catch (NoResultException e) {
+            // ZMIANA: Użycie getSingleResultOrNull() jest czystsze
+            return q.getSingleResultOrNull();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Błąd pobierania Trenera po ID: " + id, e);
             return null;
         }
     }
     
-    // Dodajemy metodę pomocniczą 'findTrainerById' (wzorowaną na dyskusji),
-    // która zwraca obiekt po kluczu, aby była spójna z innymi kontrolerami:
-    public Trainer findTrainerById(Session session, String trainerCod) {
-        // Zakładamy, że 'trainerCod' to klucz główny Trenera, np. tCod
-        return session.get(Trainer.class, trainerCod); 
+    // =========================================================================
+    // METODY POMOCNICZE
+    // =========================================================================
+
+    /**
+     * Pobiera największy istniejący kod Trenera (tCod), używany do generowania
+     * nowego, unikalnego kodu.
+     * @return Maksymalny kod Trenera (String) lub null, jeśli baza jest pusta.
+     */
+    public String getMaxTrainerCode(Session session) {
+        try {
+            Query<String> query = session.createQuery(
+                "SELECT t.tCod FROM Trainer t ORDER BY t.tCod DESC", String.class);
+            query.setMaxResults(1);
+            
+            // ZMIANA: Użycie getSingleResultOrNull() jest bezpieczniejsze
+            return query.getSingleResultOrNull();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Brak trenerów w bazie. Błąd pobierania max tCod.", e);
+            return null; 
+        }
     }
 
-
-    public java.util.List<String> getTrainerByName(Session session, String name) {
+    /**
+     * Wyszukuje listę nazw Trenerów.
+     * UWAGA: Zwracanie listy stringów (nazw) jest rzadko spotykane w DAO. Zazwyczaj
+     * zwraca się pełne obiekty Trainer. Metoda zostaje zachowana w oryginalnej formie.
+     */
+    public List<String> getTrainerByName(Session session, String name) {
         Query<String> query = session.createQuery(
             "SELECT t.tName FROM Trainer t WHERE t.tName = :name", String.class);
         query.setParameter("name", name);

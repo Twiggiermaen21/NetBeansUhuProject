@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Utils;
 
 import Models.Trainer;
@@ -11,24 +7,45 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Kontroler odpowiedzialny za pobieranie i prezentację danych encji Trainer
+ * w głównym oknie aplikacji (MainWindow).
+ */
 public class TrainerControllerTable {
+
+    private static final Logger LOGGER = Logger.getLogger(TrainerControllerTable.class.getName());
 
     private final SessionFactory sessionFactory;
     private final MainWindow view;
-    private final TrainerDAO trainerDAO = new TrainerDAO(); // Zakładam, że masz DAO        
+    private final TrainerDAO trainerDAO = new TrainerDAO(); 
+
+    // Ujednolicone nazwy kolumn dla widoku
+    private static final String[] COLUMN_NAMES = {"Kod", "Imię i Nazwisko", "ID (Numer)", "Telefon", "E-mail", "Data zatrudnienia", "Nick"};
 
     public TrainerControllerTable(SessionFactory sessionFactory, MainWindow view) {
         this.sessionFactory = sessionFactory;
         this.view = view;
     }
 
-    public Trainer getSelectedTrainer() {
-        String trainerId = view.getSelectedTrainerCode(); // Używamy metody z MainWindow
+    // =========================================================================
+    // POBIERANIE POJEDYNCZEJ ENCJ (DO EDYCJI)
+    // =========================================================================
 
-        if (trainerId == null) {
+    /**
+     * Pobiera pełny obiekt Trainer na podstawie kodu zaznaczonego w tabeli.
+     * Używane przez MainController przed uruchomieniem formularza edycji.
+     * * @return Obiekt Trainer lub null, jeśli nic nie zaznaczono lub wystąpił błąd.
+     */
+    public Trainer getSelectedTrainer() {
+        // Zwraca KOD Trenera (tCod) z kolumny 0
+        String trainerCod = view.getSelectedTrainerCode(); 
+
+        if (trainerCod == null || trainerCod.trim().isEmpty()) {
             return null;
         }
 
@@ -36,13 +53,11 @@ public class TrainerControllerTable {
         Trainer trainer = null;
         try {
             session = sessionFactory.openSession();
-            // Używamy DAO do znalezienia obiektu po ID
-            // TrainerDAO musi mieć metodę findById lub findByCode
-            trainer = trainerDAO.returnTrainerByID(session, trainerId);
-            // Zakładam, że TrainerDAO ma metodę findTrainerById
-
+            // Wyszukiwanie obiektu po kluczu głównym (tCod)
+            trainer = trainerDAO.getTrainerByCod(session, trainerCod); 
+            
         } catch (Exception e) {
-            System.err.println("Błąd pobierania Trenera: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Błąd pobierania Trenera o kodzie: " + trainerCod, e);
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
@@ -51,16 +66,26 @@ public class TrainerControllerTable {
         return trainer;
     }
 
+    // =========================================================================
+    // WYŚWIETLANIE WSZYSTKICH DANYCH (READ)
+    // =========================================================================
+
+    /**
+     * Pobiera wszystkich Trenerów z bazy danych i ustawia dane w tabeli głównego widoku.
+     */
     public void showTrainers() {
         Session session = null;
         try {
             session = sessionFactory.openSession();
+            // Zapytanie HQL pobierające wszystkich Trenerów
             Query<Trainer> query = session.createQuery("FROM Trainer", Trainer.class);
             List<Trainer> trainers = query.getResultList();
+            LOGGER.info("Pobrano " + trainers.size() + " trenerów.");
 
-            String[] columns = {"COD", "NAME", "ID NUMBER", "PHONE", "EMAIL", "DATE", "NICK"};
+            String[] columns = COLUMN_NAMES; 
             Object[][] data = new Object[trainers.size()][7];
 
+            // Mapowanie danych do dwuwymiarowej tablicy
             for (int i = 0; i < trainers.size(); i++) {
                 Trainer t = trainers.get(i);
                 data[i][0] = t.getTCod();
@@ -72,11 +97,13 @@ public class TrainerControllerTable {
                 data[i][6] = t.getTNick();
             }
 
+            // Aktualizacja widoku
             view.setViewName("Trainers");
             view.setTableData(columns, data);
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(view, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, "Błąd podczas wyświetlania listy Trenerów.", ex);
+            JOptionPane.showMessageDialog(view, "Błąd pobierania danych: " + ex.getMessage(), "Błąd DB", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
