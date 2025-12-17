@@ -167,5 +167,7 @@ public class Activity implements Serializable {
     public String toString() {
         return "Models.Activity[ aId=" + aId + " ]";
     }
-    
+   public String getDisplayName() {
+    return this.aName; // lub cokolwiek innego co ma widzieć użytkownik
+} 
 }

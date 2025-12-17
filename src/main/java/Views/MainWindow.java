@@ -39,8 +39,18 @@ public class MainWindow extends javax.swing.JFrame {
         jNowy = new javax.swing.JButton();
         jUsun = new javax.swing.JButton();
         jAktualizuj = new javax.swing.JButton();
+        jPanelSearch = new javax.swing.JPanel();
         jSearchText = new javax.swing.JTextField();
         jSearchBox = new javax.swing.JComboBox<>();
+        jSearchIcon = new javax.swing.JLabel();
+        jPanelCalculate = new javax.swing.JPanel();
+        jButtonCalculate = new javax.swing.JButton();
+        jCalculateLabel = new javax.swing.JLabel();
+        jPanelClientToActivity = new javax.swing.JPanel();
+        jButtonClientToActivity = new javax.swing.JButton();
+        jTextFieldClientToActivity = new javax.swing.JTextField();
+        jComboBoxClientToActivity = new javax.swing.JComboBox<>();
+        jLabelClientToA = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         Main = new javax.swing.JMenu();
         Clients = new javax.swing.JMenu();
@@ -48,6 +58,7 @@ public class MainWindow extends javax.swing.JFrame {
         Activities = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setForeground(java.awt.Color.white);
 
         viewNameLabel.setText("Panel Główny");
 
@@ -58,14 +69,14 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(viewNameLabel)
-                .addGap(356, 356, 356))
+                .addGap(344, 344, 344))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(31, 31, 31)
+                .addGap(14, 14, 14)
                 .addComponent(viewNameLabel)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         dataTable.setBorder(new javax.swing.border.MatteBorder(null));
@@ -99,6 +110,10 @@ public class MainWindow extends javax.swing.JFrame {
         jAktualizuj.setForeground(new java.awt.Color(0, 0, 0));
         jAktualizuj.setText("Aktualizuj");
 
+        jPanelSearch.setBackground(new java.awt.Color(255, 51, 255));
+
+        jSearchText.setBorder(null);
+
         jSearchBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jSearchBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -106,34 +121,151 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
 
+        jSearchIcon.setBackground(new java.awt.Color(204, 0, 51));
+        jSearchIcon.setForeground(new java.awt.Color(255, 102, 255));
+        jSearchIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/search.png"))); // NOI18N
+        jSearchIcon.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 5));
+
+        javax.swing.GroupLayout jPanelSearchLayout = new javax.swing.GroupLayout(jPanelSearch);
+        jPanelSearch.setLayout(jPanelSearchLayout);
+        jPanelSearchLayout.setHorizontalGroup(
+            jPanelSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelSearchLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jSearchIcon)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanelSearchLayout.setVerticalGroup(
+            jPanelSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelSearchLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jSearchIcon))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanelSearchLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jSearchBox, jSearchIcon, jSearchText});
+
+        jPanelCalculate.setBackground(new java.awt.Color(255, 204, 204));
+
+        jButtonCalculate.setText("Oblicz");
+
+        jCalculateLabel.setForeground(new java.awt.Color(0, 0, 0));
+        jCalculateLabel.setText("Oblicz statystyki dla aktywności");
+        jCalculateLabel.setBorder(new javax.swing.border.MatteBorder(null));
+
+        javax.swing.GroupLayout jPanelCalculateLayout = new javax.swing.GroupLayout(jPanelCalculate);
+        jPanelCalculate.setLayout(jPanelCalculateLayout);
+        jPanelCalculateLayout.setHorizontalGroup(
+            jPanelCalculateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelCalculateLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jCalculateLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButtonCalculate)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanelCalculateLayout.setVerticalGroup(
+            jPanelCalculateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelCalculateLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanelCalculateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCalculateLabel)
+                    .addComponent(jButtonCalculate))
+                .addContainerGap())
+        );
+
+        jPanelCalculateLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonCalculate, jCalculateLabel});
+
+        jPanelClientToActivity.setBackground(new java.awt.Color(255, 255, 51));
+
+        jButtonClientToActivity.setText("Dodaj Aktywność");
+        jButtonClientToActivity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonClientToActivityActionPerformed(evt);
+            }
+        });
+
+        jComboBoxClientToActivity.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabelClientToA.setForeground(new java.awt.Color(0, 0, 0));
+        jLabelClientToA.setText("Połącz użytkownika z aktywnością");
+        jLabelClientToA.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        javax.swing.GroupLayout jPanelClientToActivityLayout = new javax.swing.GroupLayout(jPanelClientToActivity);
+        jPanelClientToActivity.setLayout(jPanelClientToActivityLayout);
+        jPanelClientToActivityLayout.setHorizontalGroup(
+            jPanelClientToActivityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelClientToActivityLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabelClientToA, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextFieldClientToActivity, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jComboBoxClientToActivity, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButtonClientToActivity, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanelClientToActivityLayout.setVerticalGroup(
+            jPanelClientToActivityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelClientToActivityLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelClientToActivityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonClientToActivity)
+                    .addComponent(jComboBoxClientToActivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldClientToActivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelClientToA))
+                .addContainerGap())
+        );
+
+        jPanelClientToActivityLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonClientToActivity, jComboBoxClientToActivity, jTextFieldClientToActivity});
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jNowy, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jUsun, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jAktualizuj, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
-                .addComponent(jSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanelClientToActivity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jNowy, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jUsun, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jAktualizuj, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jPanelCalculate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jPanelSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGap(26, 26, 26))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jNowy)
-                    .addComponent(jSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jUsun)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jAktualizuj)
-                .addGap(0, 19, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jPanelSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jPanelCalculate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jNowy)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jUsun)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jAktualizuj)))
+                .addGap(18, 18, 18)
+                .addComponent(jPanelClientToActivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         Main.setText("Main");
@@ -159,19 +291,22 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 778, Short.MAX_VALUE))
-                .addContainerGap())
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 217, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
@@ -184,6 +319,10 @@ public class MainWindow extends javax.swing.JFrame {
     private void jSearchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSearchBoxActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jSearchBoxActionPerformed
+
+    private void jButtonClientToActivityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClientToActivityActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonClientToActivityActionPerformed
 
     /**
      * @param args the command line arguments
@@ -239,13 +378,23 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JMenu Trainers;
     public javax.swing.JTable dataTable;
     public javax.swing.JButton jAktualizuj;
+    public javax.swing.JButton jButtonCalculate;
+    public javax.swing.JButton jButtonClientToActivity;
+    public javax.swing.JLabel jCalculateLabel;
+    public javax.swing.JComboBox<String> jComboBoxClientToActivity;
+    public javax.swing.JLabel jLabelClientToA;
     private javax.swing.JMenuBar jMenuBar1;
     public javax.swing.JButton jNowy;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    public javax.swing.JPanel jPanelCalculate;
+    public javax.swing.JPanel jPanelClientToActivity;
+    public javax.swing.JPanel jPanelSearch;
     private javax.swing.JScrollPane jScrollPane1;
     public javax.swing.JComboBox<String> jSearchBox;
+    public javax.swing.JLabel jSearchIcon;
     public javax.swing.JTextField jSearchText;
+    public javax.swing.JTextField jTextFieldClientToActivity;
     public javax.swing.JButton jUsun;
     public javax.swing.JLabel viewNameLabel;
     // End of variables declaration//GEN-END:variables
@@ -437,5 +586,26 @@ public void initSearchListeners() {
     // Reaguj na zmianę kolumny w ComboBox
     jSearchBox.addActionListener(e -> filterTable());
 }
+
+
+public void setClientToActivityName(String name) {
+    jTextFieldClientToActivity.setText(name);
+}
+
+// Pobiera wybraną aktywność z ComboBoxa (zwraca obiekt Activity lub String)
+public Object getSelectedActivityFromCombo() {
+    return jComboBoxClientToActivity.getSelectedItem();
+}
+
+// Dodaje listener do przycisku "Dodaj Aktywność"
+public void addClientToActivityListener(java.awt.event.ActionListener al) {
+    jButtonClientToActivity.addActionListener(al);
+}
+
+// Dodaje listener do tabeli, aby reagować na kliknięcia wierszy
+public void addTableSelectionListener(javax.swing.event.ListSelectionListener lsl) {
+    dataTable.getSelectionModel().addListSelectionListener(lsl);
+}
+
     
 }

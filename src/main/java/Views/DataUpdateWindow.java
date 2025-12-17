@@ -12,7 +12,7 @@ import javax.swing.JTextField;
  * @author kacpe
  */
 public class DataUpdateWindow extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DataUpdateWindow.class.getName());
 
     /**
@@ -45,9 +45,11 @@ public class DataUpdateWindow extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jAkceptuj = new javax.swing.JButton();
         jAnuluj = new javax.swing.JButton();
-        jFormattedData = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         jKategoria = new javax.swing.JTextField();
+        jDateChooser = new com.toedter.calendar.JDateChooser();
+        jBirthdayChooser = new com.toedter.calendar.JDateChooser();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -103,12 +105,6 @@ public class DataUpdateWindow extends javax.swing.JFrame {
         jAnuluj.setForeground(new java.awt.Color(0, 0, 0));
         jAnuluj.setText("Anuluj");
 
-        jFormattedData.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jFormattedDataActionPerformed(evt);
-            }
-        });
-
         jLabel8.setText("Kategoria");
 
         jKategoria.addActionListener(new java.awt.event.ActionListener() {
@@ -117,6 +113,8 @@ public class DataUpdateWindow extends javax.swing.JFrame {
             }
         });
 
+        jLabel6.setText("Data Urodzenia");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -124,45 +122,55 @@ public class DataUpdateWindow extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(27, 27, 27)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel8)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel7)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel5))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jAkceptuj, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)
-                        .addComponent(jAnuluj, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jKategoria, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
-                        .addComponent(jFormattedData)
-                        .addComponent(jEmail, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jTelefon, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jNumer, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jNazwisko, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jKod, javax.swing.GroupLayout.Alignment.TRAILING)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel7)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 146, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jAkceptuj, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(29, 29, 29)
+                                    .addComponent(jAnuluj, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jKategoria, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jTelefon, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jDateChooser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jKod, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jNazwisko, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jNumer, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jEmail, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jBirthdayChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(44, 44, 44)
+                .addGap(25, 25, 25)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jKod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(jKod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jNazwisko, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
                     .addComponent(jNumer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jBirthdayChooser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addGap(3, 3, 3)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTelefon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
@@ -170,11 +178,11 @@ public class DataUpdateWindow extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
-                .addGap(9, 9, 9)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jFormattedData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5))
-                .addGap(9, 9, 9)
+                .addGap(12, 12, 12)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5)
+                    .addComponent(jDateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jKategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8))
@@ -182,7 +190,7 @@ public class DataUpdateWindow extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jAnuluj)
                     .addComponent(jAkceptuj))
-                .addContainerGap(9, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -198,7 +206,7 @@ public class DataUpdateWindow extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 302, Short.MAX_VALUE)
+            .addGap(0, 311, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addContainerGap()
@@ -228,10 +236,6 @@ public class DataUpdateWindow extends javax.swing.JFrame {
     private void jEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jEmailActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jEmailActionPerformed
-
-    private void jFormattedDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedDataActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jFormattedDataActionPerformed
 
     private void jKategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jKategoriaActionPerformed
         // TODO add your handling code here:
@@ -265,8 +269,9 @@ public class DataUpdateWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton jAkceptuj;
     public javax.swing.JButton jAnuluj;
+    public com.toedter.calendar.JDateChooser jBirthdayChooser;
+    public com.toedter.calendar.JDateChooser jDateChooser;
     public javax.swing.JTextField jEmail;
-    public javax.swing.JTextField jFormattedData;
     public javax.swing.JTextField jKategoria;
     public javax.swing.JTextField jKod;
     public javax.swing.JLabel jLabel1;
@@ -274,6 +279,7 @@ public class DataUpdateWindow extends javax.swing.JFrame {
     public javax.swing.JLabel jLabel3;
     public javax.swing.JLabel jLabel4;
     public javax.swing.JLabel jLabel5;
+    public javax.swing.JLabel jLabel6;
     public javax.swing.JLabel jLabel7;
     public javax.swing.JLabel jLabel8;
     public javax.swing.JTextField jNazwisko;
@@ -282,85 +288,114 @@ public class DataUpdateWindow extends javax.swing.JFrame {
     public javax.swing.JTextField jTelefon;
     // End of variables declaration//GEN-END:variables
 
-
 // Wewnątrz klasy Views.DataUpdateWindow:
-
 // --- Metody pobierające dane z pól (dodaj te metody) ---
-public String getKod() {
-    return jKod.getText();
-}
+    public String getKod() {
+        return jKod.getText();
+    }
 
-public String getNazwisko() {
-    return jNazwisko.getText();
-}
+    public String getNazwisko() {
+        return jNazwisko.getText();
+    }
 
-public String getNumerIdentyfikacyjny() {
-    return jNumer.getText(); // Zakładam, że to Numer Identyfikacyjny (ID)
-}
+    public String getNumerIdentyfikacyjny() {
+        return jNumer.getText(); // Zakładam, że to Numer Identyfikacyjny (ID)
+    }
 
-public String getTelefon() {
-    return jTelefon.getText();
-}
+    public String getTelefon() {
+        return jTelefon.getText();
+    }
 
-public String getEmail() {
-    return jEmail.getText();
-}
-public String getKategoria() {
-    return jKategoria.getText();
-}
+    public String getEmail() {
+        return jEmail.getText();
+    }
+
+    public String getKategoria() {
+        return jKategoria.getText();
+    }
 
 // Póki co Nick i Data zostawmy jako String, dla uproszczenia
-
-
 // Data jest w JFormattedTextField
-public Object getFormattedData() {
-    return jFormattedData.getText(); // To zwróci sparsowaną datę (jeśli formatowanie działa)
-    // Dla prostoty, można by to po prostu zwrócić jako String: jFormattedData.getText();
-}
-public void setKod(String kod) {
-    jKod.setText(kod);
+    
+
+    public void setKod(String kod) {
+        jKod.setText(kod);
+    }
+
+    public void setNazwisko(String nazwisko) {
+        jNazwisko.setText(nazwisko);
+    }
+
+    public void setNumerIdentyfikacyjny(String numer) {
+        jNumer.setText(numer);
+    }
+
+    public void setTelefon(String telefon) {
+        jTelefon.setText(telefon);
+    }
+
+    public void setEmail(String email) {
+        jEmail.setText(email);
+    }
+
+    public void setKategoria(String kategoria) {
+        // UŻYWA jKategoria1, a NIE jFormattedData
+        jKategoria.setText(kategoria);
+    }
+
+    public java.util.Date getSelectedDate() {
+        return jDateChooser.getDate();
+    }
+
+// Ustawianie daty w kalendarzu
+    public void setSelectedDate(java.util.Date date) {
+        jDateChooser.setDate(date);
+    }
+public java.util.Date getBirthdayDate() {
+    return jBirthdayChooser.getDate();
 }
 
-public void setNazwisko(String nazwisko) {
-    jNazwisko.setText(nazwisko);
+public void setBirthdayDate(java.util.Date date) {
+    jBirthdayChooser.setDate(date);
 }
 
-public void setNumerIdentyfikacyjny(String numer) {
-    jNumer.setText(numer);
+// Opcjonalnie pomocniczy getter dla Stringa (jeśli potrzebujesz)
+public String getBirthdayAsString() {
+    if (jBirthdayChooser.getDate() != null) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(jBirthdayChooser.getDate());
+    }
+    return "";
 }
+// Jeśli jednak wolisz operować na Stringu (tak jak wcześniej w ActivityDataController),
+// dodaj tę metodę, aby nie zmieniać zbyt dużo logiki w kontrolerze:
+    public String getDateAsString() {
+        if (jDateChooser.getDate() != null) {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+            return sdf.format(jDateChooser.getDate());
+        }
+        return "";
+    }
 
-public void setTelefon(String telefon) {
-    jTelefon.setText(telefon);
-}
+    /**
+     * Ustawia wartość JFormattedTextField. Należy ustawiać sparsowany obiekt
+     * (np. Date lub LocalDate).
+     */
+    
 
-public void setEmail(String email) {
-    jEmail.setText(email);
-}
-
-public void setKategoria(String kategoria) {
-    // UŻYWA jKategoria1, a NIE jFormattedData
-    jKategoria.setText(kategoria); 
-}
-
-
-
-/**
- * Ustawia wartość JFormattedTextField. Należy ustawiać sparsowany obiekt (np. Date lub LocalDate).
- */
-public void setFormattedData(String data) {
-    jFormattedData.setText(data);
-}
-public void setFieldLabels(String labelNazwisko, String labelNumer, String labelTelefon, 
-                               String labelEmail, String labelData, String labelKategoria) {
+    public void setFieldLabels(String labelNazwisko, String labelNumer, String labelTelefon,
+            String labelEmail, String labelData, String labelKategoria, String labelBirthday) {
         jLabel2.setText(labelNazwisko);
         jLabel7.setText(labelNumer);
         jLabel3.setText(labelTelefon);
         jLabel4.setText(labelEmail);
         jLabel5.setText(labelData);
         jLabel8.setText(labelKategoria);
+        jLabel6.setText(labelBirthday); // jLabel6 to Data Urodzenia
         // jLabel6 jest dla Nicku, który jest oddzielony, więc go tu nie ma.
     }
-public void setFieldVisible(Object field, boolean visible) {
+
+    public void setFieldVisible(Object field, boolean visible) {
         if (field instanceof JLabel label) {
             label.setVisible(visible);
         } else if (field instanceof JTextField textField) {
@@ -369,12 +404,12 @@ public void setFieldVisible(Object field, boolean visible) {
     }
 
 // --- Metody do podpinania ActionListenerów (dodaj te metody) ---
-public void addAkceptujListener(java.awt.event.ActionListener al) {
-    jAkceptuj.addActionListener(al);
-}
+    public void addAkceptujListener(java.awt.event.ActionListener al) {
+        jAkceptuj.addActionListener(al);
+    }
 
-public void addAnulujListener(java.awt.event.ActionListener al) {
-    jAnuluj.addActionListener(al);
-}
+    public void addAnulujListener(java.awt.event.ActionListener al) {
+        jAnuluj.addActionListener(al);
+    }
 
 }

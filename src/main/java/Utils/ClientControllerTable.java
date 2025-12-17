@@ -27,7 +27,7 @@ public class ClientControllerTable {
 
     public ClientControllerTable(SessionFactory sessionFactory, MainWindow view) {
         this.sessionFactory = sessionFactory;
-        this.view = view;
+        this.view = view;   
     }
     
     // =========================================================================
@@ -49,18 +49,19 @@ public class ClientControllerTable {
             this.currentClients = clients; 
 
             // Mapowanie danych do tabeli (View)
-            String[] columns = {"NUM", "Nazwisko/Imię", "ID (PESEL/DNI)", "Telefon", "E-mail", "Data Przyjęcia", "Kategoria"};
-            Object[][] data = new Object[clients.size()][7];
+            String[] columns = {"NUM", "Nazwisko/Imię", "ID (PESEL/DNI)","Data Urodzenia", "Telefon", "E-mail", "Data Przyjęcia", "Kategoria"};
+            Object[][] data = new Object[clients.size()][8];
 
             for (int i = 0; i < clients.size(); i++) {
                 Client c = clients.get(i);
                 data[i][0] = c.getMNum();
                 data[i][1] = c.getMName();
                 data[i][2] = c.getMId();
-                data[i][3] = c.getMPhone();
-                data[i][4] = c.getMemailMember();
-                data[i][5] = c.getMstartingDateMember();
-                data[i][6] = c.getMcategoryMember();
+                 data[i][3] = c.getMBirthdate();
+                data[i][4] = c.getMPhone();
+                data[i][5] = c.getMemailMember();
+                data[i][6] = c.getMstartingDateMember();
+                data[i][7] = c.getMcategoryMember();
             }
 
             view.setViewName("Clients");
@@ -92,4 +93,9 @@ public class ClientControllerTable {
         LOGGER.fine("Nie zaznaczono żadnego klienta.");
         return null;
     }
+    
+    
+    
+    
+    
 }

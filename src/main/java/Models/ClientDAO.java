@@ -106,5 +106,41 @@ public class ClientDAO {
         }
         return false;
     }
+    public Object[] getGlobalStatistics(Session session) {
+    // 1. Liczba klientów
+    Long totalClients = session.createQuery("SELECT COUNT(c) FROM Client c", Long.class).getSingleResult();
+
+    // 2. Pobranie wszystkich dat urodzenia do obliczenia średniego wieku
+    java.util.List<String> birthdates = session.createQuery("SELECT c.mBirthdate FROM Client c", String.class).getResultList();
+
+    // 3. Pobranie wszystkich klientów z ich kategoriami i cenami aktywności (do przychodu)
+    // Zakładamy relację c.activitySet
+    String hql = "SELECT c.mcategoryMember, a.aPrice FROM Client c JOIN c.activitySet a";
+    java.util.List<Object[]> categoryRevenueData = session.createQuery(hql, Object[].class).getResultList();
+
+    return new Object[]{totalClients, birthdates, categoryRevenueData};
+}
+    
+    public Object[] getStatisticsForActivity(Session session, String aId) {
+    // 1. Liczba klientów zapisanych na tę konkretną aktywność
+    String hqlCount = "SELECT COUNT(c) FROM Client c JOIN c.activitySet a WHERE a.aId = :id";
+    Long totalClients = session.createQuery(hqlCount, Long.class)
+                               .setParameter("id", aId)
+                               .getSingleResult();
+
+    // 2. Daty urodzenia klientów zapisanych na tę aktywność
+    String hqlBirth = "SELECT c.mBirthdate FROM Client c JOIN c.activitySet a WHERE a.aId = :id";
+    java.util.List<String> birthdates = session.createQuery(hqlBirth, String.class)
+                                               .setParameter("id", aId)
+                                               .getResultList();
+
+    // 3. Kategorie i cena tej konkretnej aktywności (dla przychodu)
+    String hqlRev = "SELECT c.mcategoryMember, a.aPrice FROM Client c JOIN c.activitySet a WHERE a.aId = :id";
+    java.util.List<Object[]> revenueData = session.createQuery(hqlRev, Object[].class)
+                                                  .setParameter("id", aId)
+                                                  .getResultList();
+
+    return new Object[]{totalClients, birthdates, revenueData};
+}
     
 }

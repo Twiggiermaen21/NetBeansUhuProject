@@ -108,4 +108,28 @@ public class ActivityDAO {
     public List<Activity> findAllActivities(Session session) {
         return session.createQuery("SELECT a FROM Activity a", Activity.class).getResultList();
     }
+    
+    
+/**
+ * Pobiera statystyki dla JEDNEJ konkretnej aktywności.
+ * @return Tablica: [0] - Nazwa, [1] - Liczba osób
+ */
+public Object[] getActivityStatisticsById(Session session, String aId) {
+    try {
+        String hql = "SELECT a.aName, COUNT(c) " +
+                     "FROM Activity a " +
+                     "LEFT JOIN a.clientSet c " +
+                     "WHERE a.aId = :targetId " +
+                     "GROUP BY a.aId, a.aName";
+        
+        return session.createQuery(hql, Object[].class)
+                      .setParameter("targetId", aId)
+                      .getSingleResultOrNull();
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Błąd pobierania statystyk dla: " + aId, e);
+        return null;
+    }
+}
+    
+    
 }

@@ -30,6 +30,7 @@ public class TrainerControllerTable {
     public TrainerControllerTable(SessionFactory sessionFactory, MainWindow view) {
         this.sessionFactory = sessionFactory;
         this.view = view;
+        
     }
 
     // =========================================================================
