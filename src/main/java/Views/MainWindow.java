@@ -18,6 +18,7 @@ public class MainWindow extends javax.swing.JFrame {
     public MainWindow() {
         initComponents();
         initializeMenuItems();
+        initSearchListeners(); // <--- DODAJ TO
         setLocationRelativeTo(null);
     }
 
@@ -38,6 +39,8 @@ public class MainWindow extends javax.swing.JFrame {
         jNowy = new javax.swing.JButton();
         jUsun = new javax.swing.JButton();
         jAktualizuj = new javax.swing.JButton();
+        jSearchText = new javax.swing.JTextField();
+        jSearchBox = new javax.swing.JComboBox<>();
         jMenuBar1 = new javax.swing.JMenuBar();
         Main = new javax.swing.JMenu();
         Clients = new javax.swing.JMenu();
@@ -96,6 +99,13 @@ public class MainWindow extends javax.swing.JFrame {
         jAktualizuj.setForeground(new java.awt.Color(0, 0, 0));
         jAktualizuj.setText("Aktualizuj");
 
+        jSearchBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jSearchBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jSearchBoxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -106,12 +116,19 @@ public class MainWindow extends javax.swing.JFrame {
                     .addComponent(jNowy, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jUsun, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jAktualizuj, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE))
-                .addContainerGap(212, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
+                .addComponent(jSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jNowy)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jNowy)
+                    .addComponent(jSearchText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jUsun)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -163,6 +180,10 @@ public class MainWindow extends javax.swing.JFrame {
     private void jNowyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jNowyActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jNowyActionPerformed
+
+    private void jSearchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSearchBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jSearchBoxActionPerformed
 
     /**
      * @param args the command line arguments
@@ -223,6 +244,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    public javax.swing.JComboBox<String> jSearchBox;
+    public javax.swing.JTextField jSearchText;
     public javax.swing.JButton jUsun;
     public javax.swing.JLabel viewNameLabel;
     // End of variables declaration//GEN-END:variables
@@ -247,16 +270,18 @@ public class MainWindow extends javax.swing.JFrame {
      * Uzupełnia tabelę danymi i nazwami kolumn. Dodatkowo blokuje możliwość
      * ręcznej edycji komórek przez użytkownika.
      */
-    public void setTableData(String[] columnNames, Object[][] data) {
-        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(data, columnNames) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Zwraca false, żeby użytkownik nie mógł wpisywać w tabelę ręcznie
-                return false;
-            }
-        };
-        dataTable.setModel(model);
-    }
+   public void setTableData(String[] columnNames, Object[][] data) {
+    javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(data, columnNames) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+    dataTable.setModel(model);
+    
+    // Po ustawieniu modelu, skonfiguruj sorter i kolumny w jSearchBox
+    setupTableSorter(); 
+}
     
 
     /**
@@ -277,12 +302,14 @@ public class MainWindow extends javax.swing.JFrame {
      * Przydatne do pobrania np. ID klienta (zakładając, że jest w kolumnie 0).
      */
     public Object getSelectedValueAt(int columnIndex) {
-        int row = dataTable.getSelectedRow();
-        if (row != -1) {
-            return dataTable.getValueAt(row, columnIndex);
-        }
-        return null;
+    int viewRow = dataTable.getSelectedRow();
+    if (viewRow != -1) {
+        // Konwertuje indeks widoku na indeks modelu (ważne przy filtrowaniu!)
+        int modelRow = dataTable.convertRowIndexToModel(viewRow);
+        return dataTable.getModel().getValueAt(modelRow, columnIndex);
     }
+    return null;
+}
 
     // --- LISTENERY PRZYCISKÓW (Podpinanie akcji) ---
     // Podpięcie akcji pod pierwszy przycisk (np. Dodaj)
@@ -357,5 +384,58 @@ public String getSelectedClientCode() {
         Object value = getSelectedValueAt(0); // Zakładamy, że ID jest w kolumnie 0
         return (value != null) ? value.toString() : null;
     }
+    
+    private javax.swing.table.TableRowSorter<javax.swing.table.DefaultTableModel> sorter;
+
+/**
+ * Konfiguruje sorter tabeli i wypełnia JComboBox nazwami kolumn.
+ */
+public void setupTableSorter() {
+    javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) dataTable.getModel();
+    sorter = new javax.swing.table.TableRowSorter<>(model);
+    dataTable.setRowSorter(sorter);
+
+    // Automatyczne wypełnienie ComboBoxa aktualnymi nazwami kolumn
+    jSearchBox.removeAllItems();
+    for (int i = 0; i < model.getColumnCount(); i++) {
+        jSearchBox.addItem(model.getColumnName(i));
+    }
+}
+
+/**
+ * Logika filtrowania wierszy.
+ */
+private void filterTable() {
+    if (sorter == null) return;
+
+    String text = jSearchText.getText();
+    int columnIndex = jSearchBox.getSelectedIndex();
+
+    if (text.trim().isEmpty()) {
+        sorter.setRowFilter(null);
+    } else {
+        // (?i) oznacza ignorowanie wielkości liter
+        try {
+            sorter.setRowFilter(javax.swing.RowFilter.regexFilter("(?i)" + text, columnIndex));
+        } catch (java.util.regex.PatternSyntaxException e) {
+            // W razie błędu w składni regex nie rób nic
+        }
+    }
+}
+
+/**
+ * Dodaje listenery do pól wyszukiwania. Wywołaj to w konstruktorze MainWindow.
+ */
+public void initSearchListeners() {
+    // Reaguj na pisanie w polu tekstowym
+    jSearchText.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        public void changedUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
+        public void removeUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
+        public void insertUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
+    });
+
+    // Reaguj na zmianę kolumny w ComboBox
+    jSearchBox.addActionListener(e -> filterTable());
+}
     
 }

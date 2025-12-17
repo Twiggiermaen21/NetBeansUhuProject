@@ -140,6 +140,8 @@ public class MainController implements ActionListener {
         view.jNowy.setVisible(visible);
         view.jUsun.setVisible(visible);
         view.jAktualizuj.setVisible(visible);
+        view.jSearchText.setVisible(visible);
+        view.jSearchBox.setVisible(visible);
     }
 
     // =========================================================================
