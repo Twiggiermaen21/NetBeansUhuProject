@@ -236,6 +236,7 @@ public class MainController implements ActionListener {
                 trainerControllerTable.showTrainers();
                 view.setButtonLabels("Dodaj Trenera", "Usuń Trenera", "Edytuj Trenera");
                 currentView = "Trainer";
+                view.jTextFieldClientToActivity.setText(null);
                 updatePanelVisibility(true, false, false);
             }
             case "ShowActivities" -> {
@@ -243,6 +244,7 @@ public class MainController implements ActionListener {
                 view.setButtonLabels("Dodaj Aktywność", "Usuń Aktywność", "Edytuj Aktywność");
                 currentView = "Activity";
                 updatePanelVisibility(true, true, false);
+                view.jTextFieldClientToActivity.setText(null);
             }
             case "ShowInit" -> showInit();
         }
@@ -269,6 +271,7 @@ public class MainController implements ActionListener {
     private void showInit() {
         view.setTableData(new String[]{"Info"}, new Object[][]{{"Witaj w systemie ISDD. Wybierz opcję z menu."}});
         updatePanelVisibility(false, false, false);
+        view.jTextFieldClientToActivity.setText(null);
         currentView = "Init";
     }
 
