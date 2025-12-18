@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
  
 import jakarta.persistence.Basic;
@@ -19,8 +15,10 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- *
- * @author stgad
+ * Klasa encyjna reprezentująca tabelę ACTIVITY w bazie danych.
+ * Przechowuje informacje o zajęciach (aktywnościach) oferowanych przez system, 
+ * ich harmonogramie, cenach oraz przypisanych trenerach i uczestnikach.
+ * Implementuje interfejs {@link Serializable} w celu umożliwienia serializacji stanu obiektu.
  */
 @Entity
 @Table(name = "ACTIVITY")
@@ -35,41 +33,75 @@ import java.util.Set;
 public class Activity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /** Unikalny identyfikator aktywności (Klucz podstawowy). */
     @Id
     @Basic(optional = false)
     @Column(name = "a_id")
     private String aId;
+
+    /** Nazwa zajęć. */
     @Basic(optional = false)
     @Column(name = "a_name")
     private String aName;
+
+    /** Opis lub typ aktywności. */
     @Basic(optional = false)
     @Column(name = "a_description")
     private String aDescription;
+
+    /** Cena za udział w aktywności (PLN). */
     @Basic(optional = false)
     @Column(name = "a_price")
     private int aPrice;
+
+    /** Dzień tygodnia, w którym odbywają się zajęcia. */
     @Basic(optional = false)
     @Column(name = "a_day")
     private String aDay;
+
+    /** Godzina rozpoczęcia zajęć. */
     @Basic(optional = false)
     @Column(name = "a_hour")
     private int aHour;
+
+    /** * Relacja Many-to-Many z encją {@link Client}. 
+     * Mapowanie realizowane przez tabelę pośrednią PERFORMS.
+     */
     @JoinTable(name = "PERFORMS", joinColumns = {
         @JoinColumn(name = "p_id", referencedColumnName = "a_id")}, inverseJoinColumns = {
         @JoinColumn(name = "p_num", referencedColumnName = "m_num")})
     @ManyToMany
     private Set<Client> clientSet;
+
+    /** * Relacja Many-to-One z encją {@link Trainer}. 
+     * Wskazuje na trenera odpowiedzialnego za dane zajęcia.
+     */
     @JoinColumn(name = "a_trainerInCharge", referencedColumnName = "t_cod")
     @ManyToOne
     private Trainer atrainerInCharge;
 
+    /** Konstruktor bezargumentowy wymagany przez specyfikację JPA. */
     public Activity() {
     }
 
+    /**
+     * Konstruktor inicjalizujący obiekt z określonym identyfikatorem.
+     * @param aId Unikalny kod aktywności.
+     */
     public Activity(String aId) {
         this.aId = aId;
     }
 
+    /**
+     * Konstruktor inicjalizujący obiekt wszystkimi wymaganymi polami.
+     * @param aId Identyfikator aktywności.
+     * @param aName Nazwa zajęć.
+     * @param aDescription Opis zajęć.
+     * @param aPrice Cena.
+     * @param aDay Dzień tygodnia.
+     * @param aHour Godzina rozpoczęcia.
+     */
     public Activity(String aId, String aName, String aDescription, int aPrice, String aDay, int aHour) {
         this.aId = aId;
         this.aName = aName;
@@ -143,6 +175,10 @@ public class Activity implements Serializable {
         this.atrainerInCharge = atrainerInCharge;
     }
 
+    /**
+     * Generuje kod hash dla obiektu na podstawie identyfikatora.
+     * @return Wartość hashCode.
+     */
     @Override
     public int hashCode() {
         int hash = 0;
@@ -150,9 +186,13 @@ public class Activity implements Serializable {
         return hash;
     }
 
+    /**
+     * Porównuje dwa obiekty Activity pod kątem tożsamości.
+     * @param object Obiekt do porównania.
+     * @return True, jeśli identyfikatory są identyczne.
+     */
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Activity)) {
             return false;
         }
@@ -167,7 +207,12 @@ public class Activity implements Serializable {
     public String toString() {
         return "Models.Activity[ aId=" + aId + " ]";
     }
-   public String getDisplayName() {
-    return this.aName; // lub cokolwiek innego co ma widzieć użytkownik
-} 
+
+    /**
+     * Zwraca nazwę aktywności do celów prezentacji w interfejsie użytkownika.
+     * @return Nazwa aktywności (aName).
+     */
+    public String getDisplayName() {
+        return this.aName;
+    } 
 }

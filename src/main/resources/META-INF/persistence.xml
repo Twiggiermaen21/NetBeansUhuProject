@@ -3,10 +3,10 @@
   <persistence-unit name="ISDD_ISDD_Project_jar_1.0-SNAPSHOTPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:mariadb://172.18.1.241:3306/ISDD_007"/>
-      <property name="javax.persistence.jdbc.user" value="ISDD_007"/>
+      <!--<property name="javax.persistence.jdbc.url" value="jdbc:mariadb://172.18.1.241:3306/ISDD_007"/>-->
+      <!--<property name="javax.persistence.jdbc.user" value="ISDD_007"/>-->
       <property name="javax.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
-      <property name="javax.persistence.jdbc.password" value="ISDD_007"/>
+      <!--<property name="javax.persistence.jdbc.password" value="ISDD_007"/>-->
     </properties>
   </persistence-unit>
 </persistence>

@@ -15,18 +15,43 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Kontroler odpowiedzialny za obsługę okna edycji i dodawania danych klienta.
+ * Zarządza interakcją pomiędzy widokiem {@link DataUpdateWindow} a bazą danych,
+ * zapewniając automatyczne generowanie kodów klientów, walidację danych oraz
+ * poprawne formatowanie dat (dd/MM/yyyy).
+ */
 public class ClientDataController {
 
+    /** Logger do rejestrowania zdarzeń diagnostycznych i błędów. */
     private static final Logger LOGGER = Logger.getLogger(ClientDataController.class.getName());
+    
+    /** Fabryka sesji Hibernate. */
     private final SessionFactory sessionFactory;
+    
+    /** Okno dialogowe formularza danych. */
     private final DataUpdateWindow view;
+    
+    /** Obiekt dostępu do danych dla encji Client. */
     private final ClientDAO clientDAO;
+    
+    /** Kontroler zarządzający tabelą klientów (używany do odświeżania widoku). */
     private final ClientControllerTable clientControllerTable;
+    
+    /** Obiekt klienta przeznaczony do aktualizacji; null w przypadku tworzenia nowego rekordu. */
     private final Client clientToUpdate; 
     
-    // Format zgodny z Twoimi Stringami w bazie danych
+    /** Formater dat zgodny ze strukturą bazy danych (dzień/miesiąc/rok). */
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
+    /**
+     * Inicjalizuje kontroler danych klienta.
+     * Ustawia słuchacze zdarzeń dla przycisków Akceptuj i Anuluj.
+     * * @param sessionFactory Fabryka sesji Hibernate.
+     * @param view Instancja okna formularza.
+     * @param clientControllerTable Kontroler tabeli do wywołania odświeżenia danych.
+     * @param clientToUpdate Obiekt klienta do edycji lub null dla nowego klienta.
+     */
     public ClientDataController(SessionFactory sessionFactory, DataUpdateWindow view, 
                                 ClientControllerTable clientControllerTable, Client clientToUpdate) {
         this.sessionFactory = sessionFactory;
@@ -39,8 +64,12 @@ public class ClientDataController {
         this.view.addAnulujListener(e -> view.dispose());
     }
 
+    /**
+     * Przygotowuje formularz do wyświetlenia.
+     * Konfiguruje etykiety pól, widoczność kalendarzy oraz wypełnia pola danymi
+     * w zależności od trybu (edycja/dodawanie).
+     */
     public void initializeForm() {
-        // Ustawienie etykiet widoku
         view.setFieldLabels("Imię i Nazwisko", "Numer Identyfikacyjny", "Telefon", 
                             "E-mail", "Data Przyjęcia", "Kategoria (A-D)", "Data Urodzenia");
 
@@ -58,6 +87,10 @@ public class ClientDataController {
         }
     }
 
+    /**
+     * Automatycznie generuje kolejny numer członkowski dla nowego klienta
+     * i ustawia domyślne wartości dat w formularzu.
+     */
     private void initializeFormWithAutoData() {
         Session session = null;
         try {
@@ -66,7 +99,6 @@ public class ClientDataController {
             view.jKod.setText(generateNextMemberNumber(maxNum));
             view.jKod.setEditable(false);
             
-            // Domyślne wartości dla nowych pól
             view.setSelectedDate(new Date());
             view.setBirthdayDate(null); 
 
@@ -77,8 +109,11 @@ public class ClientDataController {
         }
     }
 
+    /**
+     * Wypełnia pola formularza danymi istniejącego klienta.
+     * Dokonuje parsowania dat ze Stringów na obiekty typu Date dla komponentów GUI.
+     */
     private void populateForm() {
-        // Dane tekstowe
         view.setKod(clientToUpdate.getMNum());
         view.jKod.setEditable(false);
         view.setNazwisko(clientToUpdate.getMName());
@@ -87,7 +122,6 @@ public class ClientDataController {
         view.setEmail(clientToUpdate.getMemailMember());
         view.setKategoria(String.valueOf(clientToUpdate.getMcategoryMember()));
 
-        // Data Przyjęcia
         try {
             String entryDateStr = clientToUpdate.getMstartingDateMember();
             if (entryDateStr != null && !entryDateStr.isEmpty()) {
@@ -95,7 +129,6 @@ public class ClientDataController {
             }
         } catch (Exception e) { view.setSelectedDate(new Date()); }
 
-        // Data Urodzenia (używa pola mBirthdate z Twojego modelu)
         try {
             String birthDateStr = clientToUpdate.getMBirthdate();
             if (birthDateStr != null && !birthDateStr.isEmpty()) {
@@ -104,6 +137,11 @@ public class ClientDataController {
         } catch (Exception e) { view.setBirthdayDate(null); }
     }
 
+    /**
+     * Generuje nowy numer członkowski na podstawie najwyższego numeru w bazie.
+     * * @param maxNum Obecnie najwyższy numer (np. "S005").
+     * @return Następny numer w sekwencji (np. "S006").
+     */
     private String generateNextMemberNumber(String maxNum) {
         if (maxNum == null || maxNum.length() < 2) return "S001";
         try {
@@ -113,14 +151,23 @@ public class ClientDataController {
         } catch (Exception e) { return "S001"; }
     }
     
+    /**
+     * Zamienia puste lub białe znaki na wartość null.
+     * * @param value Wartość tekstowa do sprawdzenia.
+     * @return Przetworzony String lub null.
+     */
     private String getNullIfBlank(String value) {
         return (value == null || value.trim().isEmpty()) ? null : value.trim();
     }
 
+    /**
+     * Klasa wewnętrzna obsługująca logikę zapisu danych.
+     * Realizuje walidację pól obowiązkowych, sprawdza unikalność numeru DNI 
+     * i wykonuje operację INSERT lub UPDATE za pośrednictwem Hibernate.
+     */
     private class FormSubmitListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            // Pobranie danych z widoku
             String mNum = view.getKod().trim();
             String mId = view.getNumerIdentyfikacyjny().trim();
             String mName = view.getNazwisko().trim();
@@ -131,7 +178,6 @@ public class ClientDataController {
             Date entryDate = view.getSelectedDate();
             Date birthDate = view.getBirthdayDate();
 
-            // Walidacja pól obowiązkowych
             if (mNum.isEmpty() || mId.isEmpty() || mName.isEmpty() || category.isEmpty() || entryDate == null) {
                 JOptionPane.showMessageDialog(view, "Pola Kod, ID, Nazwisko, Kategoria i Data Przyjęcia są wymagane.", "Błąd", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -148,7 +194,7 @@ public class ClientDataController {
                 session = sessionFactory.openSession();
                 tr = session.beginTransaction();
 
-                // Unikalność DNI
+                // Walidacja unikalności numeru DNI
                 if (clientDAO.existDNI(session, mId)) {
                     if (clientToUpdate == null || !mId.equals(clientToUpdate.getMId())) {
                         JOptionPane.showMessageDialog(view, "ID już istnieje w bazie.", "Błąd", JOptionPane.ERROR_MESSAGE);
@@ -158,21 +204,19 @@ public class ClientDataController {
                 }
 
                 if (clientToUpdate == null) {
-                    // Tworzenie nowego klienta
                     Client nc = new Client(mNum, mName, mId, fmtEntryDate, catChar);
                     nc.setMPhone(mPhone);
                     nc.setMemailMember(mEmail);
-                    nc.setMBirthdate(fmtBirthDate); // Zintegrowane z Twoim modelem
+                    nc.setMBirthdate(fmtBirthDate);
                     clientDAO.insertClient(session, nc);
                 } else {
-                    // Aktualizacja istniejącego
                     clientToUpdate.setMName(mName);
                     clientToUpdate.setMId(mId);
                     clientToUpdate.setMPhone(mPhone);
                     clientToUpdate.setMemailMember(mEmail);
                     clientToUpdate.setMstartingDateMember(fmtEntryDate);
                     clientToUpdate.setMcategoryMember(catChar);
-                    clientToUpdate.setMBirthdate(fmtBirthDate); // Zintegrowane z Twoim modelem
+                    clientToUpdate.setMBirthdate(fmtBirthDate);
                     clientDAO.updateClient(session, clientToUpdate);
                 }
 

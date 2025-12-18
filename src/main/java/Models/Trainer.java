@@ -1,9 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
- 
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,8 +12,10 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- *
- * @author stgad
+ * Klasa encyjna reprezentująca tabelę TRAINER w bazie danych.
+ * Przechowuje szczegółowe informacje o trenerach pracujących w systemie, 
+ * ich dane kontaktowe, identyfikatory oraz pseudonimy.
+ * Klasa definiuje relację jeden-do-wielu z zajęciami (Activity), którymi trener zarządza.
  */
 @Entity
 @Table(name = "TRAINER")
@@ -33,35 +31,65 @@ import java.util.Set;
 public class Trainer implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /** Unikalny kod trenera (Klucz podstawowy). */
     @Id
     @Basic(optional = false)
     @Column(name = "t_cod")
     private String tCod;
+
+    /** Imię i nazwisko trenera. */
     @Basic(optional = false)
     @Column(name = "t_name")
     private String tName;
+
+    /** Numer identyfikacyjny trenera (np. DNI lub numer legitymacji). */
     @Basic(optional = false)
     @Column(name = "t_idNumber")
     private String tidNumber;
+
+    /** Numer telefonu kontaktowego trenera. */
     @Column(name = "t_phoneNumber")
     private String tphoneNumber;
+
+    /** Adres e-mail trenera. */
     @Column(name = "t_email")
     private String tEmail;
+
+    /** Data zatrudnienia lub rejestracji trenera w systemie (jako String). */
     @Basic(optional = false)
     @Column(name = "t_date")
     private String tDate;
+
+    /** Pseudonim lub nick trenera używany w systemie. */
     @Column(name = "t_nick")
     private String tNick;
+
+    /** * Zbiór aktywności, za które dany trener jest odpowiedzialny.
+     * Relacja jeden-do-wielu mapowana przez pole atrainerInCharge w encji {@link Activity}.
+     */
     @OneToMany(mappedBy = "atrainerInCharge")
     private Set<Activity> activitySet;
 
+    /** Konstruktor bezargumentowy wymagany przez specyfikację JPA/Hibernate. */
     public Trainer() {
     }
 
+    /**
+     * Tworzy obiekt trenera z przypisanym kodem.
+     * @param tCod Unikalny kod trenera.
+     */
     public Trainer(String tCod) {
         this.tCod = tCod;
     }
 
+    /**
+     * Tworzy obiekt trenera z kompletem wymaganych danych.
+     * @param tCod Kod trenera.
+     * @param tName Imię i nazwisko.
+     * @param tidNumber Numer identyfikacyjny.
+     * @param tDate Data zatrudnienia.
+     */
     public Trainer(String tCod, String tName, String tidNumber, String tDate) {
         this.tCod = tCod;
         this.tName = tName;
@@ -133,6 +161,10 @@ public class Trainer implements Serializable {
         this.activitySet = activitySet;
     }
 
+    /**
+     * Generuje kod hash na podstawie kodu trenera.
+     * @return Wartość hashCode.
+     */
     @Override
     public int hashCode() {
         int hash = 0;
@@ -140,9 +172,13 @@ public class Trainer implements Serializable {
         return hash;
     }
 
+    /**
+     * Porównuje dwa obiekty Trainer pod kątem ich tożsamości bazodanowej.
+     * @param object Obiekt do porównania.
+     * @return True, jeśli kody trenerów są identyczne.
+     */
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Trainer)) {
             return false;
         }

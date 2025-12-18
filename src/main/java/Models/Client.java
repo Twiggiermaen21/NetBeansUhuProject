@@ -1,17 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
 
 import jakarta.persistence.*;
-
 import java.io.Serializable;
 import java.util.Set;
 
 /**
- *
- * @author stgad
+ * Klasa encyjna reprezentująca tabelę CLIENT w bazie danych.
+ * Przechowuje szczegółowe informacje o klientach (członkach) systemu, 
+ * w tym dane kontaktowe, daty przystąpienia oraz przynależność do kategorii.
+ * Klasa obsługuje relację wiele-do-wielu z zajęciami (Activity).
  */
 @NamedNativeQuery(
         name = "Client.findByMcategoryMemberSQL",
@@ -33,38 +30,71 @@ import java.util.Set;
 public class Client implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /** Unikalny numer członkowski klienta (Klucz podstawowy). */
     @Id
     @Basic(optional = false)
     @Column(name = "m_num")
     private String mNum;
+
+    /** Imię i nazwisko klienta. */
     @Basic(optional = false)
     @Column(name = "m_name")
     private String mName;
+
+    /** Numer identyfikacyjny klienta (np. PESEL lub DNI). */
     @Basic(optional = false)
     @Column(name = "m_id")
     private String mId;
+
+    /** Data urodzenia przechowywana jako ciąg znaków. */
     @Column(name = "m_birthdate")
     private String mBirthdate;
+
+    /** Numer telefonu kontaktowego. */
     @Column(name = "m_phone")
     private String mPhone;
+
+    /** Adres e-mail klienta. */
     @Column(name = "m_emailMember")
     private String memailMember;
+
+    /** Data zarejestrowania klienta w systemie. */
     @Basic(optional = false)
     @Column(name = "m_startingDateMember")
     private String mstartingDateMember;
+
+    /** Kategoria członkostwa (np. określająca poziom zniżek lub typ dostępu). */
     @Basic(optional = false)
     @Column(name = "m_categoryMember")
     private Character mcategoryMember;
+
+    /** * Zbiór aktywności, w których uczestniczy dany klient.
+     * Relacja wiele-do-wielu mapowana przez pole clientSet w encji {@link Activity}.
+     */
     @ManyToMany(mappedBy = "clientSet")
     private Set<Activity> activitySet;
 
+    /** Konstruktor domyślny wymagany przez Hibernate/JPA. */
     public Client() {
     }
 
+    /**
+     * Tworzy nowy obiekt klienta z przypisanym numerem członkowskim.
+     * @param mNum Numer członkowski.
+     */
     public Client(String mNum) {
         this.mNum = mNum;
     }
 
+    /**
+     * Tworzy nowy obiekt klienta z kompletem wymaganych danych.
+     * @param mNum Numer członkowski.
+     * @param mName Imię i nazwisko.
+     * @param mId Numer identyfikacyjny.
+     * @param mstartingDateMember Data rozpoczęcia członkostwa.
+     * @param mcategoryMember Kategoria członka.
+     */
     public Client(String mNum, String mName, String mId, String mstartingDateMember, Character mcategoryMember) {
         this.mNum = mNum;
         this.mName = mName;
@@ -154,7 +184,6 @@ public class Client implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Client)) {
             return false;
         }

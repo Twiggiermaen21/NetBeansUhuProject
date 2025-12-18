@@ -18,26 +18,41 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 /**
- * Główny Kontroler aplikacji.
- * Zarządza przełączaniem widoków, operacjami CRUD oraz relacjami Klient-Aktywność.
+ * Główny Kontroler aplikacji zarządza przepływem danych i interakcją między modelami a widokiem głównym.
+ * Klasa odpowiada za dynamiczne przełączanie między widokami klientów, trenerów i aktywności,
+ * obsługę pełnego cyklu operacji CRUD oraz zarządzanie relacjami biznesowymi, takimi jak
+ * zapisywanie klientów na wybrane aktywności (relacja Many-to-Many).
  */
 public class MainController implements ActionListener {
 
+    /** Obiekt loggera do rejestrowania zdarzeń systemowych i błędów w warstwie kontrolera. */
     private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
+    /** Fabryka sesji Hibernate współdzielona między wszystkimi komponentami aplikacji. */
     private final SessionFactory sessionFactory;
+    
+    /** Główne okno interfejsu graficznego użytkownika. */
     private final MainWindow view;
     
+    /** Obiekty dostępu do danych (DAO) dla głównych encji systemowych. */
     private final ClientDAO clientDAO = new ClientDAO();
     private final TrainerDAO trainerDAO = new TrainerDAO();
     private final ActivityDAO activityDAO = new ActivityDAO();
     
+    /** Flaga określająca aktualnie wyświetlany moduł (np. "Client", "Trainer", "Activity"). */
     private String currentView = "Init";
 
+    /** Kontrolery pomocnicze odpowiedzialne za zarządzanie danymi wyświetlanymi w tabelach. */
     private final ClientControllerTable clientControllerTable;
     private final TrainerControllerTable trainerControllerTable;
     private final ActivityControllerTable activityControllerTable;
 
+    /**
+     * Konstruktor głównego kontrolera. Inicjalizuje podrzędne kontrolery tabel,
+     * rejestruje słuchacze zdarzeń menu i przycisków oraz przygotowuje komponenty
+     * do obsługi relacji między encjami (np. ComboBox aktywności).
+     * * @param sessionFactory Fabryka sesji przekazana z ConnectionController po udanym logowaniu.
+     */
     public MainController(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
         this.view = new MainWindow();
@@ -59,6 +74,9 @@ public class MainController implements ActionListener {
         view.setVisible(true);
     }
 
+    /**
+     * Rejestruje słuchacze zdarzeń dla pozycji menu oraz głównych przycisków akcji (Nowy, Usuń, Aktualizuj).
+     */
     private void addListeners() {
         view.addClientMenuListener(this);
         view.addTrainerMenuListener(this);
@@ -70,6 +88,10 @@ public class MainController implements ActionListener {
         view.addAktualizujListener(new ActionListenerForUpdateButton());
     }
 
+    /**
+     * Dodaje słuchacza zamknięcia okna, który zapewnia poprawne zamknięcie
+     * fabryki sesji Hibernate przed wyjściem z programu.
+     */
     private void addWindowCloseListener() {
         view.addWindowListener(new WindowAdapter() {
             @Override
@@ -81,8 +103,9 @@ public class MainController implements ActionListener {
     }
 
     /**
-     * Ustawia renderer dla ComboBoxa i wypełnia go danymi.
-     * Dzięki temu użytkownik widzi Nazwę, a my operujemy na Obiekcie.
+     * Pobiera listę aktywności z bazy danych i odświeża komponent JComboBox.
+     * Stosuje niestandardowy renderer, aby wyświetlać nazwy aktywności, 
+     * zachowując dostęp do pełnych obiektów {@link Activity}.
      */
     public void refreshActivityCombo() {
         Session session = null;
@@ -116,7 +139,8 @@ public class MainController implements ActionListener {
     }
 
     /**
-     * Przenosi Imię i Nazwisko wybranego klienta do pola tekstowego połączenia.
+     * Inicjalizuje logikę śledzenia zaznaczenia w tabeli. 
+     * Przenosi Imię i Nazwisko zaznaczonego klienta do pola tekstowego połączenia.
      */
     private void initTableSelectionLogic() {
         view.dataTable.getSelectionModel().addListSelectionListener(e -> {
@@ -134,7 +158,8 @@ public class MainController implements ActionListener {
     }
 
     /**
-     * Obsługa przycisku "Dodaj Aktywność" (relacja Many-to-Many).
+     * Konfiguruje obsługę przycisku przypisywania klienta do aktywności.
+     * Weryfikuje poprawność zaznaczenia oraz inicjuje zapis relacji w bazie danych.
      */
     private void initClientToActivityButton() {
         view.jButtonClientToActivity.addActionListener(e -> {
@@ -151,6 +176,12 @@ public class MainController implements ActionListener {
         });
     }
 
+    /**
+     * Zapisuje powiązanie Many-to-Many między Klientem a Aktywnością.
+     * Wykorzystuje sesję Hibernate do pobrania obiektów i aktualizacji zbioru uczestników.
+     * * @param clientCode Kod zaznaczonego klienta.
+     * @param activity Wybrany obiekt aktywności.
+     */
     private void handleSaveEnrollment(String clientCode, Activity activity) {
         Session session = null;
         Transaction tr = null;
@@ -187,6 +218,11 @@ public class MainController implements ActionListener {
         }
     }
 
+    /**
+     * Obsługuje zdarzenia wyboru modułu z menu górnego.
+     * Zmienia kontekst aplikacji, etykiety przycisków i odświeża dane w tabeli.
+     * * @param e Obiekt zdarzenia menu.
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
@@ -212,6 +248,12 @@ public class MainController implements ActionListener {
         }
     }
 
+    /**
+     * Zarządza widocznością paneli interfejsu użytkownika w zależności od kontekstu.
+     * * @param crud Widoczność przycisków operacji podstawowych.
+     * @param calc Widoczność panelu kalkulacji.
+     * @param enroll Widoczność panelu zapisów na aktywności.
+     */
     private void updatePanelVisibility(boolean crud, boolean calc, boolean enroll) {
         view.jNowy.setVisible(crud);
         view.jUsun.setVisible(crud);
@@ -221,17 +263,23 @@ public class MainController implements ActionListener {
         view.jPanelClientToActivity.setVisible(enroll);
     }
 
+    /**
+     * Przywraca stan początkowy interfejsu z instrukcją powitalną.
+     */
     private void showInit() {
         view.setTableData(new String[]{"Info"}, new Object[][]{{"Witaj w systemie ISDD. Wybierz opcję z menu."}});
         updatePanelVisibility(false, false, false);
         currentView = "Init";
     }
 
-    // --- LOGIKA FORMULARZY ---
+    /**
+     * Otwiera okno edycji/dodawania i inicjalizuje odpowiedni kontroler szczegółowy.
+     * * @param entity Obiekt do edycji lub null w przypadku tworzenia nowego rekordu.
+     * @param type Typ danych ("Client", "Trainer" lub "Activity").
+     */
     private void handleFormAction(Object entity, String type) {
         DataUpdateWindow form = new DataUpdateWindow();
         Object ctrl = null;
-        boolean isAdding = (entity == null);
         
         switch (type) {
             case "Client" -> ctrl = new ClientDataController(sessionFactory, form, clientControllerTable, (Client) entity);
@@ -247,11 +295,12 @@ public class MainController implements ActionListener {
         form.setVisible(true);
     }
 
-    // --- KLASY WEWNĘTRZNE DLA PRZYCISKÓW ---
+    /** Klasa wewnętrzna obsługująca zdarzenie dodawania nowej pozycji. */
     private class ActionListenerForAddButton implements ActionListener {
         public void actionPerformed(ActionEvent e) { handleFormAction(null, currentView); }
     }
 
+    /** Klasa wewnętrzna obsługująca zdarzenie aktualizacji zaznaczonej pozycji. */
     private class ActionListenerForUpdateButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             Object entity = switch (currentView) {
@@ -265,6 +314,7 @@ public class MainController implements ActionListener {
         }
     }
 
+    /** Klasa wewnętrzna obsługująca zdarzenie usuwania zaznaczonej pozycji. */
     private class ActionListenerForUsunButton implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             String code = switch (currentView) {
@@ -280,6 +330,11 @@ public class MainController implements ActionListener {
         }
     }
 
+    /**
+     * Wykonuje operację trwałego usunięcia encji z bazy danych za pomocą DAO.
+     * * @param type Typ danych do usunięcia.
+     * @param code Unikalny kod (klucz) encji.
+     */
     private void deleteEntity(String type, String code) {
         Session session = null;
         Transaction tr = null;

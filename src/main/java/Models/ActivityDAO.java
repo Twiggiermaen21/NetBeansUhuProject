@@ -1,6 +1,5 @@
 package Models;
 
-import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import java.util.List;
@@ -8,13 +7,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Data Access Object (DAO) dla encji Activity.
- * Odpowiada za bezpośrednią interakcję z bazą danych dla Aktywności.
+ * Obiekt dostępu do danych (DAO) dla encji {@link Activity}.
+ * Klasa stanowi warstwę pośredniczącą między logiką aplikacji a bazą danych. 
+ * Zapewnia metody do wykonywania operacji CRUD (Create, Read, Update, Delete) 
+ * oraz zapytań agregujących przy użyciu mechanizmu Hibernate Session.
  */
 public class ActivityDAO {
 
+    /** Logger do rejestrowania zdarzeń oraz błędów niskiego poziomu bazy danych. */
     private static final Logger LOGGER = Logger.getLogger(ActivityDAO.class.getName());
 
+    /** Konstruktor bezargumentowy inicjalizujący obiekt DAO. */
     public ActivityDAO() {
     }
 
@@ -23,24 +26,30 @@ public class ActivityDAO {
     // =========================================================================
 
     /**
-     * Wstawia nową Aktywność do bazy danych (operacja DODAJ).
+     * Utrwala nową instancję aktywności w bazie danych (operacja INSERT).
+     * * @param session Aktualna sesja Hibernate.
+     * @param activity Obiekt aktywności do zapisania.
      */
     public void insertActivity(Session session, Activity activity) {
         session.persist(activity);
     }
 
     /**
-     * Aktualizuje istniejącą Aktywność w bazie danych (operacja EDYTUJ).
+     * Aktualizuje stan istniejącej aktywności w bazie danych (operacja UPDATE).
+     * * @param session Aktualna sesja Hibernate.
+     * @param activity Obiekt aktywności z zaktualizowanymi danymi.
      */
     public void updateActivity(Session session, Activity activity) {
         session.merge(activity);
     }
     
     /**
-     * Usuwa Aktywność na podstawie jej ID (klucza głównego aId).
+     * Usuwa rekord aktywności z bazy danych na podstawie jej identyfikatora.
+     * * @param session Aktualna sesja Hibernate.
+     * @param activityId Unikalny identyfikator aktywności (aId).
+     * @return {@code true}, jeśli operacja zakończyła się sukcesem; {@code false}, jeśli obiekt nie został znaleziony.
      */
     public boolean deleteActivityById(Session session, String activityId) {
-        // ZMIANA: Używamy find() zamiast przestarzałego get()
         Activity activityToDelete = session.find(Activity.class, activityId); 
         
         if (activityToDelete != null) {
@@ -55,35 +64,36 @@ public class ActivityDAO {
     // =========================================================================
     
     /**
-     * Sprawdza, czy Aktywność o danym aId istnieje.
+     * Sprawdza obecność aktywności o podanym identyfikatorze w systemie.
+     * * @param session Aktualna sesja Hibernate.
+     * @param aId Identyfikator aktywności do sprawdzenia.
+     * @return {@code true}, jeśli aktywność istnieje; {@code false} w przeciwnym razie.
      */
     public boolean existAId(Session session, String aId) {
         try {
             Query<Activity> q = session.createQuery("SELECT a FROM Activity a WHERE a.aId = :aId", Activity.class);
             q.setParameter("aId", aId);
             
-            // Użycie getSingleResultOrNull() jest czystsze niż łapanie NoResultException
             Activity a = q.getSingleResultOrNull(); 
             return a != null;
         } catch (Exception e) {
-            // Logowanie ewentualnych błędów związanych z wykonaniem zapytania
             LOGGER.log(Level.SEVERE, "Błąd podczas sprawdzania istnienia aId: " + aId, e);
             return false;
         }
     }
     
     /**
-     * Zwraca maksymalny kod aId Aktywności, używany do generowania kolejnych kodów.
-     * @return Maksymalny kod aId (String) lub null, jeśli baza jest pusta.
+     * Pobiera z bazy danych najwyższy aktualny kod identyfikacyjny aktywności.
+     * Metoda wykorzystywana do generowania sekwencyjnych kodów dla nowych rekordów.
+     * * @param session Aktualna sesja Hibernate.
+     * @return Ciąg znaków reprezentujący najwyższy kod (np. "AC10") lub {@code null}, jeśli tabela jest pusta.
      */
     public String getMaxActivityCode(Session session) {
         try {
-            // Zapytanie, które pobiera tylko klucze (String) i sortuje je malejąco
             Query<String> query = session.createQuery(
                 "SELECT a.aId FROM Activity a ORDER BY a.aId DESC", String.class);
             query.setMaxResults(1);
             
-            // Użycie getSingleResultOrNull() jest bezpieczniejsze
             return query.getSingleResultOrNull(); 
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Brak aktywności w bazie. Błąd pobierania max aId.", e);
@@ -91,45 +101,49 @@ public class ActivityDAO {
         }
     }
     
-    
     /**
-     * Pobiera pełny obiekt Aktywności na podstawie jej klucza głównego (aId).
-     * @return Obiekt Activity lub null, jeśli nie znaleziono.
+     * Wyszukuje pełny obiekt aktywności na podstawie klucza głównego.
+     * * @param session Aktualna sesja Hibernate.
+     * @param activityId Identyfikator aktywności.
+     * @return Obiekt {@link Activity} lub {@code null}, jeśli rekord nie istnieje.
      */
     public Activity findActivityById(Session session, String activityId) {
-        // ZMIANA: Używamy find() zamiast przestarzałego get()
         return session.find(Activity.class, activityId);
     }
 
     /**
-     * Pobiera wszystkie Aktywności.
-     * @return Lista wszystkich obiektów Activity.
+     * Pobiera kompletną listę wszystkich aktywności zarejestrowanych w systemie.
+     * * @param session Aktualna sesja Hibernate.
+     * @return Lista obiektów {@link Activity}.
      */
     public List<Activity> findAllActivities(Session session) {
         return session.createQuery("SELECT a FROM Activity a", Activity.class).getResultList();
     }
     
-    
-/**
- * Pobiera statystyki dla JEDNEJ konkretnej aktywności.
- * @return Tablica: [0] - Nazwa, [1] - Liczba osób
- */
-public Object[] getActivityStatisticsById(Session session, String aId) {
-    try {
-        String hql = "SELECT a.aName, COUNT(c) " +
-                     "FROM Activity a " +
-                     "LEFT JOIN a.clientSet c " +
-                     "WHERE a.aId = :targetId " +
-                     "GROUP BY a.aId, a.aName";
-        
-        return session.createQuery(hql, Object[].class)
-                      .setParameter("targetId", aId)
-                      .getSingleResultOrNull();
-    } catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Błąd pobierania statystyk dla: " + aId, e);
-        return null;
+    /**
+     * Pobiera dane statystyczne dotyczące uczestnictwa dla konkretnej aktywności.
+     * Wykorzystuje złączenie typu LEFT JOIN, aby uwzględnić aktywności bez przypisanych klientów.
+     * * @param session Aktualna sesja Hibernate.
+     * @param aId Identyfikator aktywności, dla której liczone są statystyki.
+     * @return Tablica obiektów, gdzie:
+     * [0] to Nazwa aktywności (String),
+     * [1] to Liczba przypisanych klientów (Long).
+     * Zwraca {@code null} w przypadku błędu lub braku aktywności.
+     */
+    public Object[] getActivityStatisticsById(Session session, String aId) {
+        try {
+            String hql = "SELECT a.aName, COUNT(c) " +
+                         "FROM Activity a " +
+                         "LEFT JOIN a.clientSet c " +
+                         "WHERE a.aId = :targetId " +
+                         "GROUP BY a.aId, a.aName";
+            
+            return session.createQuery(hql, Object[].class)
+                          .setParameter("targetId", aId)
+                          .getSingleResultOrNull();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Błąd pobierania statystyk dla: " + aId, e);
+            return null;
+        }
     }
-}
-    
-    
 }

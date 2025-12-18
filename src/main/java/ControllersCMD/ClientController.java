@@ -1,10 +1,9 @@
-// java
-package Controllers;
+package ControllersCMD;
 
 import Models.Client;
 import Models.ClientDAO;
-import Views.MessageView;
-import Views.ClientView;
+import ViewsCMD.MessageView;
+import ViewsCMD.ClientView;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -13,13 +12,31 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
+/**
+ * Kontroler zarządzający operacjami na danych klientów.
+ * Klasa umożliwia interaktywne zarządzanie bazą klientów poprzez menu konsolowe,
+ * oferując funkcje dodawania, wyszukiwania, listowania oraz usuwania rekordów
+ * przy użyciu Hibernate.
+ */
 public class ClientController {
 
+    /** Fabryka sesji Hibernate do komunikacji z bazą danych. */
     private final SessionFactory sessionFactory;
+    
+    /** Obiekt dostępu do danych (DAO) dla encji Client. */
     private final ClientDAO cDAO;
+    
+    /** Widok do wyświetlania ogólnych komunikatów systemowych. */
     private final MessageView vMessages;
+    
+    /** Widok dedykowany do prezentacji danych klientów. */
     private final ClientView vClient;
 
+    /**
+     * Konstruktor klasy ClientController.
+     * Inicjalizuje komponenty warstwy widoku i modelu, a następnie uruchamia menu główne.
+     * * @param sessionFactory Fabryka sesji Hibernate przekazana z głównego kontrolera.
+     */
     public ClientController(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
         this.cDAO = new ClientDAO();
@@ -28,24 +45,32 @@ public class ClientController {
         this.menu();
     }
 
+    /**
+     * Wyświetla menu tekstowe w konsoli i zarządza nawigacją użytkownika.
+     * Obsługuje proces wyboru opcji od dodawania po usuwanie klientów.
+     */
     private void menu() {
         Scanner keyboard = new Scanner(System.in);
         String option;
         do {
-            // Zaktualizowane menu
             vMessages.consoleMessage("INFO", "Client menu:\n1 - Add new client\n2 - Show client by member number\n3 - List all clients\n4 - Delete client\n5 - Exit");
             option = keyboard.nextLine();
             switch (option) {
                 case "1" -> addClient();
                 case "2" -> showClientByMemberNumber();
-                case "3" -> listAllClients(); // Nowa metoda
-                case "4" -> deleteClient();   // Nowa metoda
+                case "3" -> listAllClients();
+                case "4" -> deleteClient();
                 case "5" -> vMessages.consoleMessage("INFO", "Exiting client menu...");
                 default -> vMessages.consoleMessage("WARNING", "Invalid option. Try again.");
             }
         } while (!option.equals("5"));
     }
 
+    /**
+     * Przeprowadza proces dodawania nowego klienta do bazy danych.
+     * Pobiera dane od użytkownika, dokonuje walidacji unikalności numeru członkowskiego (mNum)
+     * oraz numeru ID (DNI), a następnie zapisuje obiekt {@link Client} w ramach transakcji.
+     */
     private void addClient() {
         Session session = null;
         Transaction tr = null;
@@ -103,6 +128,9 @@ public class ClientController {
         }
     }
 
+    /**
+     * Wyszukuje i wyświetla szczegółowe dane klienta na podstawie jego numeru członkowskiego.
+     */
     private void showClientByMemberNumber() {
         Session session = null;
         Scanner keyboard = new Scanner(System.in);
@@ -125,6 +153,10 @@ public class ClientController {
         }
     }
 
+    /**
+     * Pobiera z bazy danych pełną listę wszystkich zarejestrowanych klientów
+     * i przekazuje ją do widoku w celu wyświetlenia.
+     */
     private void listAllClients() {
         Session session = null;
         try {
@@ -138,6 +170,10 @@ public class ClientController {
         }
     }
 
+    /**
+     * Usuwa klienta z bazy danych na podstawie podanego numeru ID (DNI).
+     * Proces obejmuje wyszukanie klienta, a następnie wykonanie transakcyjnego usunięcia rekordu.
+     */
     private void deleteClient() {
         Session session = null;
         Transaction tr = null;

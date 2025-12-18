@@ -2,7 +2,7 @@ package Controllers;
 
 import Config.HibernateUtil;
 import Views.ConnectionView;
-import Views.MessageView;
+import ViewsCMD.MessageView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.hibernate.SessionFactory;
@@ -12,18 +12,24 @@ import java.util.logging.Logger;
 /**
  * Główny kontroler odpowiedzialny za nawiązanie początkowego połączenia z bazą danych
  * za pomocą Hibernate i uruchomienie reszty aplikacji.
+ * Klasa implementuje interfejs {@link ActionListener}, dzięki czemu może obsługiwać
+ * zdarzenia generowane przez interfejs graficzny użytkownika (okno logowania).
  */
 public class ConnectionController implements ActionListener {
 
+    /** Obiekt rejestrujący logi systemowe dla klasy ConnectionController. */
     private static final Logger LOGGER = Logger.getLogger(ConnectionController.class.getName());
 
+    /** Widok okna połączenia zawierający pola użytkownika i hasła. */
     private final ConnectionView view;
+    
+    /** Widok pomocniczy służący do wyświetlania wyskakujących okien z komunikatami. */
     private final MessageView messageView;
 
-    // =========================================================================
-    // KONSTRUKTOR
-    // =========================================================================
-
+    /**
+     * Konstruktor kontrolera. Inicjalizuje widoki, rejestruje słuchacze zdarzeń
+     * oraz sprawia, że okno logowania staje się widoczne dla użytkownika.
+     */
     public ConnectionController() {
         this.view = new ConnectionView();
         this.messageView = new MessageView();
@@ -34,17 +40,19 @@ public class ConnectionController implements ActionListener {
     }
 
     /**
-     * Rejestracja kontrolera jako słuchacza zdarzeń dla przycisków w widoku.
+     * Rejestruje bieżący kontroler jako słuchacza zdarzeń dla przycisków
+     * "Połącz" oraz "Anuluj" znajdujących się w widoku.
      */
     private void addListeners() {
         view.addConnectListener(this);
         view.addCancelListener(this);
     }
 
-    // =========================================================================
-    // OBSŁUGA ZDARZEŃ (ActionListener)
-    // =========================================================================
-
+    /**
+     * Główna metoda obsługująca akcje użytkownika. Rozpoznaje przesłaną komendę
+     * i uruchamia proces logowania lub zamyka aplikację.
+     * * @param e Obiekt zdarzenia akcji zawierający polecenie (ActionCommand).
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
@@ -60,27 +68,23 @@ public class ConnectionController implements ActionListener {
                 LOGGER.warning("Nieznane polecenie: " + command);
                 break;
         }
-
     }
     
     /**
-     * Czyści zasoby i zamyka aplikację.
+     * Zamyka aplikację w bezpieczny sposób. Przed zakończeniem procesu
+     * niszczy fabrykę sesji Hibernate, aby zwolnić zasoby i zamknąć połączenia.
      */
     private void exitApplication() {
-        // Dodatkowe zamknięcie SessionFactory, jeśli została utworzona,
-        // ale aplikacja jest zamykana przed MainController
         HibernateUtil.close(); 
         LOGGER.info("Aplikacja została zamknięta.");
         System.exit(0);
     }
 
-    // =========================================================================
-    // LOGIKA POŁĄCZENIA
-    // =========================================================================
-
     /**
-     * Metoda odpowiedzialna za pobranie danych z widoku i próbę nawiązania
-     * połączenia z bazą danych za pomocą HibernateUtil.
+     * Metoda odpowiedzialna za pobranie poświadczeń z widoku i próbę nawiązania
+     * połączenia z bazą danych za pomocą {@link HibernateUtil}.
+     * W przypadku powodzenia zamyka okno logowania i przekazuje fabrykę sesji
+     * do głównego kontrolera aplikacji (MainController).
      */
     public void appEntry() {
         String user = view.getUsername();
@@ -102,10 +106,8 @@ public class ConnectionController implements ActionListener {
             
         } else {
             // 2. Błąd
-            // Komunikat błędu został już wyświetlony przez HibernateUtil
             LOGGER.log(Level.WARNING, "Połączenie nieudane dla użytkownika: {0}. Sprawdź dane uwierzytelniające.", user);
             messageView.showError("Połączenie nieudane! Sprawdź dane uwierzytelniające.");
         }
     }
-
 }

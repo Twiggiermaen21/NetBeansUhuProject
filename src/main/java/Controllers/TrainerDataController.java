@@ -16,28 +16,44 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Kontroler odpowiedzialny za obsługę widoku DataUpdateWindow dla encji Trainer.
- * Zarządza logiką dodawania i edycji z wykorzystaniem JDateChooser.
+ * Kontroler odpowiedzialny za obsługę widoku {@link DataUpdateWindow} dla encji {@link Trainer}.
+ * Zarządza logiką biznesową podczas dodawania nowych trenerów oraz edycji istniejących rekordów.
+ * Klasa integruje komponent {@code JDateChooser} do obsługi dat oraz zapewnia walidację
+ * unikalności identyfikatorów trenerów w bazie danych.
  */
 public class TrainerDataController {
 
+    /** Logger do rejestrowania zdarzeń diagnostycznych i błędów operacji na danych trenera. */
     private static final Logger LOGGER = Logger.getLogger(TrainerDataController.class.getName());
 
+    /** Fabryka sesji Hibernate. */
     private final SessionFactory sessionFactory;
+    
+    /** Okno dialogowe do aktualizacji danych. */
     private final DataUpdateWindow view;
+    
+    /** Obiekt dostępu do danych dla encji Trainer. */
     private final TrainerDAO trainerDAO;
+    
+    /** Kontroler zarządzający tabelą trenerów, używany do odświeżania listy po zmianach. */
     private final TrainerControllerTable trainerControllerTable;
+    
+    /** Instancja trenera przeznaczona do aktualizacji (null w przypadku dodawania nowego). */
     private final Trainer trainerToUpdate; 
 
-    /** Formatator do zamiany daty z kalendarza na String dla bazy danych */
+    /** Formatator służący do konwersji obiektów {@link Date} na format tekstowy akceptowany przez bazę danych. */
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-    // =========================================================================
-    // KONSTRUKTOR
-    // =========================================================================
-
+    /**
+     * Konstruktor inicjalizujący kontroler danych trenera.
+     * Ustawia słuchacze zdarzeń dla przycisków zatwierdzania i anulowania zmian w widoku.
+     * * @param sessionFactory Fabryka sesji Hibernate.
+     * @param view Instancja okna formularza edycji.
+     * @param trainerControllerTable Referencja do kontrolera tabeli w celu odświeżania widoku.
+     * @param trainerToUpdate Obiekt trenera do edycji lub null dla nowej pozycji.
+     */
     public TrainerDataController(SessionFactory sessionFactory, DataUpdateWindow view, 
-                                 TrainerControllerTable trainerControllerTable, Trainer trainerToUpdate) {
+                                  TrainerControllerTable trainerControllerTable, Trainer trainerToUpdate) {
         this.sessionFactory = sessionFactory;
         this.view = view;
         this.trainerDAO = new TrainerDAO();
@@ -48,22 +64,22 @@ public class TrainerDataController {
         this.view.addAnulujListener(e -> view.dispose());
     }
 
-    // =========================================================================
-    // METODY INICJALIZUJĄCE
-    // =========================================================================
-
+    /**
+     * Przygotowuje i konfiguruje pola formularza przed wyświetleniem użytkownikowi.
+     * Ustawia odpowiednie etykiety, zarządza widocznością komponentów daty i pseudonimu
+     * oraz wypełnia pola danymi w przypadku trybu edycji.
+     */
     public void initializeForm() {
         // --- KONFIGURACJA WIDOKU DLA TRENERA ---
         view.setFieldLabels("Imię i Nazwisko", "ID (Numer)", "Telefon", "E-mail", 
                             "Data zatrudnienia", "Nick/Pseudonim","");
         
-        // Upewniamy się, że kalendarz jest widoczny
+        // Zarządzanie widocznością komponentów formularza
         view.jDateChooser.setVisible(true);
         view.setFieldVisible(view.jLabel8, true); 
         view.setFieldVisible(view.jKategoria, true); 
         view.jBirthdayChooser.setVisible(false);
         view.jLabel6.setVisible(false);
-        
         
         if (trainerToUpdate != null) {
             populateForm();
@@ -76,6 +92,10 @@ public class TrainerDataController {
         }
     }
     
+    /**
+     * Przenosi dane z obiektu modelu {@link Trainer} do komponentów graficznych widoku.
+     * Obsługuje również parsowanie daty zatrudnienia z formatu tekstowego.
+     */
     private void populateForm() {
         view.setKod(trainerToUpdate.getTCod());
         view.jKod.setEditable(false);
@@ -86,7 +106,6 @@ public class TrainerDataController {
         view.setEmail(trainerToUpdate.getTEmail());
         view.setKategoria(trainerToUpdate.getTNick()); 
 
-        // Konwersja String z bazy na Date dla kalendarza
         try {
             String dateStr = trainerToUpdate.getTDate();
             if (dateStr != null && !dateStr.isEmpty()) {
@@ -99,6 +118,10 @@ public class TrainerDataController {
         }
     }
 
+    /**
+     * Inicjalizuje formularz dla nowej encji, generując automatycznie kolejny kod trenera
+     * oraz ustawiając bieżącą datę jako domyślną datę zatrudnienia.
+     */
     private void initializeFormWithAutoData() {
         Session session = null;
         try {
@@ -109,7 +132,6 @@ public class TrainerDataController {
             view.jKod.setText(newNum);
             view.jKod.setEditable(false);
             
-            // Ustawienie aktualnej daty w kalendarzu
             view.setSelectedDate(new Date());
             view.setKategoria("");
 
@@ -121,6 +143,11 @@ public class TrainerDataController {
         }
     }
 
+    /**
+     * Generuje następny logiczny kod trenera (np. T001 -> T002).
+     * * @param maxNum Aktualny najwyższy kod trenera pobrany z bazy danych.
+     * @return Nowy wygenerowany kod w formacie "T00X".
+     */
     private String generateNextTrainerCode(String maxNum) {
         if (maxNum == null || maxNum.length() < 2 || !maxNum.matches("[A-Z]\\d+")) return "T001";
         try {
@@ -130,20 +157,26 @@ public class TrainerDataController {
         } catch (Exception e) { return "T001"; }
     }
 
+    /**
+     * Przekształca pusty ciąg znaków lub ciąg zawierający same spacje na wartość null.
+     * * @param value Ciąg znaków do przetworzenia.
+     * @return Przetworzony ciąg lub null.
+     */
     private String getNullIfBlank(String value) {
         return (value == null || value.trim().isEmpty()) ? null : value.trim();
     }
 
-    // =========================================================================
-    // LISTENER (OBSŁUGA ZAPISU / EDYCJI)
-    // =========================================================================
-
+    /**
+     * Klasa wewnętrzna obsługująca zdarzenie zatwierdzenia formularza.
+     * Odpowiada za walidację pól, formatowanie daty oraz wykonanie operacji trwałego zapisu
+     * lub aktualizacji w bazie danych przy użyciu sesji Hibernate.
+     */
     private class FormSubmitListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             
-            // 1. Zbieranie danych
+            // 1. Zbieranie danych z pól formularza
             String tCod = view.getKod().trim();
             String tIdNumber = view.getNumerIdentyfikacyjny().trim();
             String tName = view.getNazwisko().trim();
@@ -152,7 +185,6 @@ public class TrainerDataController {
             String tEmail = getNullIfBlank(view.getEmail());
             String tNick = getNullIfBlank(view.getKategoria());
             
-            // Pobieramy Date z jDateChooser
             Date selectedDate = view.getSelectedDate();
             
             // 2. Walidacja pól wymaganych
@@ -161,7 +193,6 @@ public class TrainerDataController {
                 return;
             }
             
-            // Formatowanie daty na String dla bazy danych
             String formattedDate = dateFormat.format(selectedDate);
             
             Session session = null;
@@ -171,7 +202,7 @@ public class TrainerDataController {
                 session = sessionFactory.openSession();
                 tr = session.beginTransaction();
                 
-                // 3. Walidacja unikalności ID Trenera
+                // 3. Sprawdzanie unikalności ID Numeru trenera
                 if (trainerDAO.existTrainerID(session, tIdNumber)) { 
                     boolean isAddingNew = trainerToUpdate == null;
                     boolean isChangingId = trainerToUpdate != null && !tIdNumber.equals(trainerToUpdate.getTidNumber());
@@ -183,7 +214,7 @@ public class TrainerDataController {
                     }
                 }
 
-                // 4. TRYB ZAPISU
+                // 4. Wykonanie zapisu lub aktualizacji
                 if (trainerToUpdate == null) {
                     Trainer newTrainer = new Trainer(tCod, tName, tIdNumber, formattedDate); 
                     newTrainer.setTphoneNumber(tPhone);

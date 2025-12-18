@@ -40,9 +40,7 @@ public class ConnectionView extends javax.swing.JFrame {
         setTitle("Connect to DB");
         setAlwaysOnTop(true);
         setForeground(java.awt.Color.darkGray);
-        setMaximumSize(new java.awt.Dimension(550, 310));
         setMinimumSize(new java.awt.Dimension(550, 310));
-        setPreferredSize(new java.awt.Dimension(565, 350));
         setResizable(false);
         setSize(new java.awt.Dimension(550, 310));
 
@@ -62,8 +60,10 @@ public class ConnectionView extends javax.swing.JFrame {
         jLabel3.setText("Password");
 
         jPasswordField1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jPasswordField1.setText("ISDD_007");
 
         jTextField1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jTextField1.setText("ISDD_007");
 
         jButton1.setBackground(new java.awt.Color(204, 0, 0));
         jButton1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N

@@ -8,9 +8,9 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
 /**
- * Klasa narzędziowa do zarządzania cyklem życia obiektu SessionFactory
- * w Hibernate. Jest to klasyczne podejście typu "Utility Class"
- * (lub Singleton) do konfiguracji połączenia z bazą danych.
+ * Klasa narzędziowa do zarządzania cyklem życia obiektu SessionFactory w
+ * Hibernate. Jest to klasyczne podejście typu "Utility Class" (lub Singleton)
+ * do konfiguracji połączenia z bazą danych.
  */
 public class HibernateUtil {
 
@@ -68,8 +68,8 @@ public class HibernateUtil {
     }
 
     /**
-     * Zwraca statyczną instancję SessionFactory.
-     * Zakłada, że wcześniej wywołano buildSessionFactory().
+     * Zwraca statyczną instancję SessionFactory. Zakłada, że wcześniej wywołano
+     * buildSessionFactory().
      *
      * @return Statyczna instancja SessionFactory.
      */
@@ -91,7 +91,7 @@ public class HibernateUtil {
             // W sekcji 'finally' dbamy o ustawienie referencji na null i zniszczenie rejestru
             // niezależnie od tego, czy zamknięcie SessionFactory się powiodło.
             sessionFactory = null;
-            
+
             if (serviceRegistry != null) {
                 StandardServiceRegistryBuilder.destroy(serviceRegistry);
                 serviceRegistry = null;

@@ -18,19 +18,42 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Zaktualizowany kontroler: Usunięto jFormattedData, wprowadzono pełną obsługę JDateChooser.
+ * Kontroler odpowiedzialny za zarządzanie danymi aktywności w oknie edycji/dodawania.
+ * Klasa obsługuje logikę biznesową formularza {@link DataUpdateWindow}, integruje 
+ * komponent {@code JDateChooser} do wyboru daty oraz komunikuje się z bazą danych 
+ * poprzez obiekty DAO.
  */
 public class ActivityDataController {
 
+    /** Logger do rejestrowania zdarzeń i błędów aplikacji. */
     private static final Logger LOGGER = Logger.getLogger(ActivityDataController.class.getName());
 
+    /** Fabryka sesji Hibernate. */
     private final SessionFactory sessionFactory;
+    
+    /** Główne okno widoku formularza. */
     private final DataUpdateWindow view;
+    
+    /** Obiekt DAO do zarządzania encjami Activity. */
     private final ActivityDAO activityDAO;
+    
+    /** Kontroler tabeli, używany do odświeżania widoku listy po zmianach. */
     private final ActivityControllerTable activityControllerTable; 
+    
+    /** Obiekt aktywności podlegający aktualizacji (null w przypadku dodawania nowej). */
     private final Activity activityToUpdate; 
+    
+    /** Obiekt DAO do weryfikacji i pobierania danych trenerów. */
     private final TrainerDAO trainerDAO; 
 
+    /**
+     * Konstruktor kontrolera danych aktywności.
+     * Inicjalizuje obiekty dostępowe i ustawia słuchacze zdarzeń dla przycisków widoku.
+     * * @param sessionFactory Fabryka sesji Hibernate.
+     * @param view Instancja okna formularza.
+     * @param activityControllerTable Odniesienie do kontrolera tabeli (odświeżanie danych).
+     * @param activityToUpdate Obiekt aktywności do edycji lub null dla nowej aktywności.
+     */
     public ActivityDataController(SessionFactory sessionFactory, DataUpdateWindow view, 
                                   ActivityControllerTable activityControllerTable, Activity activityToUpdate) {
         this.sessionFactory = sessionFactory;
@@ -40,19 +63,23 @@ public class ActivityDataController {
         this.activityToUpdate = activityToUpdate;
         this.trainerDAO = new TrainerDAO();
         
+        // Rejestracja słuchaczy zdarzeń
         this.view.addAkceptujListener(new FormSubmitListener());
         this.view.addAnulujListener(e -> view.dispose());
     }
 
+    /**
+     * Konfiguruje etykiety pól formularza oraz widoczność komponentów kalendarza.
+     * Decyduje, czy formularz ma pracować w trybie edycji, czy dodawania.
+     */
     public void initializeForm() {
-        // Label dla pola 5 zmieniony na "Data"
         view.setFieldLabels("Nazwa Aktywności", "Opis/Typ", "Cena (PLN)", 
                             "Dzień Tygodnia", "Data", "Trener (Kod T_COD)","");
         
-        // Upewniamy się, że kalendarz jest widoczny
         view.jDateChooser.setVisible(true);
- view.jBirthdayChooser.setVisible(false);
+        view.jBirthdayChooser.setVisible(false);
         view.jLabel6.setVisible(false);
+
         if (activityToUpdate != null) {
             populateForm();
             view.jAkceptuj.setText("ZAPISZ ZMIANY");
@@ -64,6 +91,9 @@ public class ActivityDataController {
         }
     }
     
+    /**
+     * Wypełnia pola formularza danymi z istniejącego obiektu {@link Activity} (tryb edycji).
+     */
     private void populateForm() {
         view.setKod(activityToUpdate.getAId());
         view.jKod.setEditable(false); 
@@ -73,13 +103,15 @@ public class ActivityDataController {
         view.setTelefon(String.valueOf(activityToUpdate.getAPrice()));
         view.setEmail(activityToUpdate.getADay());
         
-        // Przy edycji ustawiamy aktualną datę (lub datę z obiektu, jeśli go posiadasz)
         view.setSelectedDate(new java.util.Date());
         
         Trainer trainer = activityToUpdate.getAtrainerInCharge();
         view.setKategoria(trainer != null ? trainer.getTCod() : "");
     }
 
+    /**
+     * Inicjalizuje formularz domyślnymi wartościami oraz automatycznie wygenerowanym kodem (tryb dodawania).
+     */
     private void initializeFormWithAutoData() {
         Session session = null;
         try {
@@ -94,7 +126,7 @@ public class ActivityDataController {
             view.setNumerIdentyfikacyjny(""); 
             view.setTelefon("30"); 
             view.setEmail("Monday"); 
-            view.setSelectedDate(new java.util.Date()); // Ustawienie domyślnej daty
+            view.setSelectedDate(new java.util.Date()); 
             view.setKategoria(""); 
 
         } catch (Exception ex) {
@@ -105,6 +137,11 @@ public class ActivityDataController {
         }
     }
 
+    /**
+     * Generuje kolejny unikalny kod aktywności na podstawie najwyższego obecnego w bazie.
+     * * @param maxNum Obecny najwyższy kod (np. "AC05").
+     * @return Nowy kod (np. "AC06") lub "AC01" w przypadku braku danych.
+     */
     private String generateNextActivityCode(String maxNum) {
         if (maxNum == null || !maxNum.matches("[A-Z]{2}\\d+")) return "AC01";
         try {
@@ -114,14 +151,20 @@ public class ActivityDataController {
         } catch (Exception e) { return "AC01"; }
     }
 
+    /**
+     * Pomocnicza metoda zamieniająca puste ciągi znaków na wartość null.
+     * * @param value Ciąg znaków do sprawdzenia.
+     * @return Przetworzony ciąg lub null.
+     */
     private String getNullIfBlank(String value) {
         return (value == null || value.trim().isEmpty()) ? null : value.trim();
     }
 
-    // =========================================================================
-    // LISTENER - TYLKO JCALENDAR
-    // =========================================================================
-
+    /**
+     * Wewnętrzna klasa obsługująca zdarzenie kliknięcia przycisku zatwierdzenia.
+     * Odpowiada za walidację danych wejściowych, obsługę transakcji Hibernate
+     * oraz zapis (INSERT/UPDATE) obiektu w bazie danych.
+     */
     private class FormSubmitListener implements ActionListener {
 
         @Override
@@ -129,18 +172,16 @@ public class ActivityDataController {
             Session session = null;
             Transaction tr = null;
 
-            // 1. Zbieranie danych (bez jFormattedData)
+            // Pobieranie danych z widoku
             String aIdFromForm = view.getKod().trim();
             String aName = view.getNazwisko().trim();
             String aDescription = getNullIfBlank(view.getNumerIdentyfikacyjny());
             String priceStr = view.getTelefon().trim();
             String aDay = view.getEmail().trim();
             String trainerCod = getNullIfBlank(view.getKategoria());
-            
-            // Pobieramy Date z jDateChooser
             Date selectedDate = view.getSelectedDate();
             
-            // 2. Walidacja
+            // Walidacja pól wymaganych
             if (aIdFromForm.isEmpty() || aName.isEmpty() || priceStr.isEmpty() || selectedDate == null) {
                 JOptionPane.showMessageDialog(view, "Wszystkie pola (w tym data) muszą być wypełnione.", "Błąd", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -149,7 +190,6 @@ public class ActivityDataController {
             try {
                 int aPrice = Integer.parseInt(priceStr);
                 
-                // Wyciągamy godzinę z kalendarza, aby zachować zgodność z modelem Activity (int aHour)
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(selectedDate);
                 int aHourFromCalendar = cal.get(Calendar.HOUR_OF_DAY);
@@ -166,13 +206,13 @@ public class ActivityDataController {
                 }
 
                 if (activityToUpdate == null) {
-                    // DODAWANIE
+                    // Logika zapisu nowej aktywności
                     Activity newActivity = new Activity(aIdFromForm, aName, aDescription, aPrice, aDay, aHourFromCalendar);
                     newActivity.setAtrainerInCharge(assignedTrainer);
                     activityDAO.insertActivity(session, newActivity);
                     JOptionPane.showMessageDialog(view, "Dodano aktywność: " + aName);
                 } else {
-                    // EDYCJA
+                    // Logika aktualizacji istniejącej aktywności
                     activityToUpdate.setAName(aName);
                     activityToUpdate.setADescription(aDescription);
                     activityToUpdate.setAPrice(aPrice);
@@ -197,4 +237,4 @@ public class ActivityDataController {
             }
         }
     }
-} 
+}
