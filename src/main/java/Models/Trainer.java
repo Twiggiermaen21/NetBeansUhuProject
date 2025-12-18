@@ -190,8 +190,9 @@ public class Trainer implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "Models.Trainer[ tCod=" + tCod + " ]";
-    }
+public String toString() {
+    // To co tu zwrócisz, pojawi się w liście rozwijanej
+    return this.tName; 
+}
     
 }

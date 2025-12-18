@@ -57,7 +57,7 @@ public class Activity implements Serializable {
 
     /** Dzień tygodnia, w którym odbywają się zajęcia. */
     @Basic(optional = false)
-    @Column(name = "a_day")
+    @Column(name = "a_day", length = 20)
     private String aDay;
 
     /** Godzina rozpoczęcia zajęć. */

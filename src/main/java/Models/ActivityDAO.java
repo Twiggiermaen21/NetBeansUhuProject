@@ -63,6 +63,31 @@ public class ActivityDAO {
     // METODY WYSZUKIWANIA / WALIDACJI
     // =========================================================================
     
+    
+    
+    public boolean isTrainerOccupied(Session session, String trainerCod, String day, int hour, String currentActivityId) {
+    String hql = "SELECT count(a) FROM Activity a WHERE a.atrainerInCharge.tCod = :tCod " +
+                 "AND a.aDay = :aDay AND a.aHour = :aHour";
+    
+    // Jeśli edytujemy istniejącą aktywność, musimy ją wykluczyć z wyszukiwania
+    if (currentActivityId != null) {
+        hql += " AND a.aId != :currentId";
+    }
+
+    Query<Long> query = session.createQuery(hql, Long.class);
+    query.setParameter("tCod", trainerCod);
+    query.setParameter("aDay", day);
+    query.setParameter("aHour", hour);
+    
+    if (currentActivityId != null) {
+        query.setParameter("currentId", currentActivityId);
+    }
+
+    return query.getSingleResult() > 0;
+}
+    
+    
+    
     /**
      * Sprawdza obecność aktywności o podanym identyfikatorze w systemie.
      * * @param session Aktualna sesja Hibernate.

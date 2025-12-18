@@ -148,4 +148,23 @@ public class TrainerDAO {
         query.setParameter("name", name);
         return query.getResultList();
     }
+    
+    
+    /**
+ * Pobiera listę wszystkich trenerów z bazy danych.
+ * @param session Aktualna sesja Hibernate.
+ * @return Lista obiektów {@link Trainer}.
+ */
+public List<Trainer> findAllTrainers(Session session) {
+    try {
+        Query<Trainer> query = session.createQuery("FROM Trainer", Trainer.class);
+        return query.getResultList();
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Błąd podczas pobierania listy wszystkich trenerów", e);
+        return java.util.Collections.emptyList();
+    }
+}
+    
+    
+    
 }

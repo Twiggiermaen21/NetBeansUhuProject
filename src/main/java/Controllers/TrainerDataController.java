@@ -16,44 +16,66 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Kontroler odpowiedzialny za obsługę widoku {@link DataUpdateWindow} dla encji {@link Trainer}.
- * Zarządza logiką biznesową podczas dodawania nowych trenerów oraz edycji istniejących rekordów.
- * Klasa integruje komponent {@code JDateChooser} do obsługi dat oraz zapewnia walidację
- * unikalności identyfikatorów trenerów w bazie danych.
+ * Kontroler odpowiedzialny za obsługę widoku {@link DataUpdateWindow} dla encji
+ * {@link Trainer}. Zarządza logiką biznesową podczas dodawania nowych trenerów
+ * oraz edycji istniejących rekordów. Klasa integruje komponent
+ * {@code JDateChooser} do obsługi dat oraz zapewnia walidację unikalności
+ * identyfikatorów trenerów w bazie danych.
  */
 public class TrainerDataController {
 
-    /** Logger do rejestrowania zdarzeń diagnostycznych i błędów operacji na danych trenera. */
+    /**
+     * Logger do rejestrowania zdarzeń diagnostycznych i błędów operacji na
+     * danych trenera.
+     */
     private static final Logger LOGGER = Logger.getLogger(TrainerDataController.class.getName());
 
-    /** Fabryka sesji Hibernate. */
+    /**
+     * Fabryka sesji Hibernate.
+     */
     private final SessionFactory sessionFactory;
-    
-    /** Okno dialogowe do aktualizacji danych. */
-    private final DataUpdateWindow view;
-    
-    /** Obiekt dostępu do danych dla encji Trainer. */
-    private final TrainerDAO trainerDAO;
-    
-    /** Kontroler zarządzający tabelą trenerów, używany do odświeżania listy po zmianach. */
-    private final TrainerControllerTable trainerControllerTable;
-    
-    /** Instancja trenera przeznaczona do aktualizacji (null w przypadku dodawania nowego). */
-    private final Trainer trainerToUpdate; 
 
-    /** Formatator służący do konwersji obiektów {@link Date} na format tekstowy akceptowany przez bazę danych. */
+    /**
+     * Okno dialogowe do aktualizacji danych.
+     */
+    private final DataUpdateWindow view;
+
+    /**
+     * Obiekt dostępu do danych dla encji Trainer.
+     */
+    private final TrainerDAO trainerDAO;
+
+    /**
+     * Kontroler zarządzający tabelą trenerów, używany do odświeżania listy po
+     * zmianach.
+     */
+    private final TrainerControllerTable trainerControllerTable;
+
+    /**
+     * Instancja trenera przeznaczona do aktualizacji (null w przypadku
+     * dodawania nowego).
+     */
+    private final Trainer trainerToUpdate;
+
+    /**
+     * Formatator służący do konwersji obiektów {@link Date} na format tekstowy
+     * akceptowany przez bazę danych.
+     */
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     /**
-     * Konstruktor inicjalizujący kontroler danych trenera.
-     * Ustawia słuchacze zdarzeń dla przycisków zatwierdzania i anulowania zmian w widoku.
+     * Konstruktor inicjalizujący kontroler danych trenera. Ustawia słuchacze
+     * zdarzeń dla przycisków zatwierdzania i anulowania zmian w widoku.
+     *
      * * @param sessionFactory Fabryka sesji Hibernate.
      * @param view Instancja okna formularza edycji.
-     * @param trainerControllerTable Referencja do kontrolera tabeli w celu odświeżania widoku.
-     * @param trainerToUpdate Obiekt trenera do edycji lub null dla nowej pozycji.
+     * @param trainerControllerTable Referencja do kontrolera tabeli w celu
+     * odświeżania widoku.
+     * @param trainerToUpdate Obiekt trenera do edycji lub null dla nowej
+     * pozycji.
      */
-    public TrainerDataController(SessionFactory sessionFactory, DataUpdateWindow view, 
-                                  TrainerControllerTable trainerControllerTable, Trainer trainerToUpdate) {
+    public TrainerDataController(SessionFactory sessionFactory, DataUpdateWindow view,
+            TrainerControllerTable trainerControllerTable, Trainer trainerToUpdate) {
         this.sessionFactory = sessionFactory;
         this.view = view;
         this.trainerDAO = new TrainerDAO();
@@ -65,21 +87,25 @@ public class TrainerDataController {
     }
 
     /**
-     * Przygotowuje i konfiguruje pola formularza przed wyświetleniem użytkownikowi.
-     * Ustawia odpowiednie etykiety, zarządza widocznością komponentów daty i pseudonimu
-     * oraz wypełnia pola danymi w przypadku trybu edycji.
+     * Przygotowuje i konfiguruje pola formularza przed wyświetleniem
+     * użytkownikowi. Ustawia odpowiednie etykiety, zarządza widocznością
+     * komponentów daty i pseudonimu oraz wypełnia pola danymi w przypadku trybu
+     * edycji.
      */
     public void initializeForm() {
         // --- KONFIGURACJA WIDOKU DLA TRENERA ---
-        view.setFieldLabels("Imię i Nazwisko", "ID (Numer)", "Telefon", "E-mail", 
-                            "Data zatrudnienia", "Nick/Pseudonim","");
-        
+        view.setFieldLabels("Imię i Nazwisko", "ID (Numer)", "Telefon", "E-mail",
+                "Data zatrudnienia", "Nick/Pseudonim", "");
+
         // Zarządzanie widocznością komponentów formularza
         view.jDateChooser.setVisible(true);
-        view.setFieldVisible(view.jLabel8, true); 
-        view.setFieldVisible(view.jKategoria, true); 
+        view.setFieldVisible(view.jLabel8, true);
+        view.setFieldVisible(view.jKategoria, true);
         view.jBirthdayChooser.setVisible(false);
         view.jLabel6.setVisible(false);
+        view.jComboBoxDay.setVisible(false);
+        view.jComboBoxTime.setVisible(false);
+        view.jComboBoxTrener.setVisible(false);
         
         if (trainerToUpdate != null) {
             populateForm();
@@ -91,20 +117,21 @@ public class TrainerDataController {
             view.setTitle("Dodawanie Nowego Trenera");
         }
     }
-    
+
     /**
-     * Przenosi dane z obiektu modelu {@link Trainer} do komponentów graficznych widoku.
-     * Obsługuje również parsowanie daty zatrudnienia z formatu tekstowego.
+     * Przenosi dane z obiektu modelu {@link Trainer} do komponentów graficznych
+     * widoku. Obsługuje również parsowanie daty zatrudnienia z formatu
+     * tekstowego.
      */
     private void populateForm() {
         view.setKod(trainerToUpdate.getTCod());
         view.jKod.setEditable(false);
-        
+
         view.setNazwisko(trainerToUpdate.getTName());
         view.setNumerIdentyfikacyjny(trainerToUpdate.getTidNumber());
         view.setTelefon(trainerToUpdate.getTphoneNumber());
         view.setEmail(trainerToUpdate.getTEmail());
-        view.setKategoria(trainerToUpdate.getTNick()); 
+        view.setKategoria(trainerToUpdate.getTNick());
 
         try {
             String dateStr = trainerToUpdate.getTDate();
@@ -119,8 +146,8 @@ public class TrainerDataController {
     }
 
     /**
-     * Inicjalizuje formularz dla nowej encji, generując automatycznie kolejny kod trenera
-     * oraz ustawiając bieżącą datę jako domyślną datę zatrudnienia.
+     * Inicjalizuje formularz dla nowej encji, generując automatycznie kolejny
+     * kod trenera oraz ustawiając bieżącą datę jako domyślną datę zatrudnienia.
      */
     private void initializeFormWithAutoData() {
         Session session = null;
@@ -128,10 +155,10 @@ public class TrainerDataController {
             session = sessionFactory.openSession();
             String maxNum = trainerDAO.getMaxTrainerCode(session);
             String newNum = generateNextTrainerCode(maxNum);
-            
+
             view.jKod.setText(newNum);
             view.jKod.setEditable(false);
-            
+
             view.setSelectedDate(new Date());
             view.setKategoria("");
 
@@ -139,26 +166,35 @@ public class TrainerDataController {
             LOGGER.log(Level.SEVERE, "Błąd podczas inicjalizacji kodu trenera.", ex);
             view.jKod.setText("BŁĄD");
         } finally {
-            if (session != null) session.close();
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
     /**
      * Generuje następny logiczny kod trenera (np. T001 -> T002).
+     *
      * * @param maxNum Aktualny najwyższy kod trenera pobrany z bazy danych.
      * @return Nowy wygenerowany kod w formacie "T00X".
      */
     private String generateNextTrainerCode(String maxNum) {
-        if (maxNum == null || maxNum.length() < 2 || !maxNum.matches("[A-Z]\\d+")) return "T001";
+        if (maxNum == null || maxNum.length() < 2 || !maxNum.matches("[A-Z]\\d+")) {
+            return "T001";
+        }
         try {
             String prefix = maxNum.substring(0, 1);
             int nextNum = Integer.parseInt(maxNum.substring(1)) + 1;
             return prefix + String.format("%03d", nextNum);
-        } catch (Exception e) { return "T001"; }
+        } catch (Exception e) {
+            return "T001";
+        }
     }
 
     /**
-     * Przekształca pusty ciąg znaków lub ciąg zawierający same spacje na wartość null.
+     * Przekształca pusty ciąg znaków lub ciąg zawierający same spacje na
+     * wartość null.
+     *
      * * @param value Ciąg znaków do przetworzenia.
      * @return Przetworzony ciąg lub null.
      */
@@ -168,45 +204,70 @@ public class TrainerDataController {
 
     /**
      * Klasa wewnętrzna obsługująca zdarzenie zatwierdzenia formularza.
-     * Odpowiada za walidację pól, formatowanie daty oraz wykonanie operacji trwałego zapisu
-     * lub aktualizacji w bazie danych przy użyciu sesji Hibernate.
+     * Odpowiada za walidację pól, formatowanie daty oraz wykonanie operacji
+     * trwałego zapisu lub aktualizacji w bazie danych przy użyciu sesji
+     * Hibernate.
      */
     private class FormSubmitListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            
+
             // 1. Zbieranie danych z pól formularza
             String tCod = view.getKod().trim();
             String tIdNumber = view.getNumerIdentyfikacyjny().trim();
             String tName = view.getNazwisko().trim();
-            
+
             String tPhone = getNullIfBlank(view.getTelefon());
             String tEmail = getNullIfBlank(view.getEmail());
             String tNick = getNullIfBlank(view.getKategoria());
-            
+
             Date selectedDate = view.getSelectedDate();
-            
+
+            // 2. Walidacja pól wymaganych
             // 2. Walidacja pól wymaganych
             if (tCod.isEmpty() || tIdNumber.isEmpty() || tName.isEmpty() || selectedDate == null) {
                 JOptionPane.showMessageDialog(view, "Kod, Imię/Nazwisko, ID i Data są wymagane.", "Błąd", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            
+
+            // 2a. WALIDACJA DNI (8 cyfr + wielka litera)
+            if (!tIdNumber.matches("\\d{8}[A-Z]")) {
+                JOptionPane.showMessageDialog(view, "Format ID musi zawierać 8 cyfr i jedną wielką literę.", "Błąd formatu", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 2b. WALIDACJA DATY (brak dat przyszłych)
+            if (selectedDate.after(new Date())) {
+                JOptionPane.showMessageDialog(view, "Data zatrudnienia nie może być z przyszłości.", "Błąd daty", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (tEmail != null) {
+                String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+                if (!tEmail.matches(emailRegex)) {
+                    JOptionPane.showMessageDialog(view,
+                            "Podany adres e-mail ma nieprawidłowy format.",
+                            "Błąd walidacji",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
             String formattedDate = dateFormat.format(selectedDate);
-            
+
             Session session = null;
             Transaction tr = null;
 
             try {
                 session = sessionFactory.openSession();
                 tr = session.beginTransaction();
-                
+
                 // 3. Sprawdzanie unikalności ID Numeru trenera
-                if (trainerDAO.existTrainerID(session, tIdNumber)) { 
+                if (trainerDAO.existTrainerID(session, tIdNumber)) {
                     boolean isAddingNew = trainerToUpdate == null;
                     boolean isChangingId = trainerToUpdate != null && !tIdNumber.equals(trainerToUpdate.getTidNumber());
-                    
+
                     if (isAddingNew || isChangingId) {
                         JOptionPane.showMessageDialog(view, "ID Trenera już istnieje w bazie.", "Błąd", JOptionPane.ERROR_MESSAGE);
                         tr.rollback();
@@ -216,10 +277,10 @@ public class TrainerDataController {
 
                 // 4. Wykonanie zapisu lub aktualizacji
                 if (trainerToUpdate == null) {
-                    Trainer newTrainer = new Trainer(tCod, tName, tIdNumber, formattedDate); 
+                    Trainer newTrainer = new Trainer(tCod, tName, tIdNumber, formattedDate);
                     newTrainer.setTphoneNumber(tPhone);
                     newTrainer.setTEmail(tEmail);
-                    newTrainer.setTNick(tNick); 
+                    newTrainer.setTNick(tNick);
                     trainerDAO.insertTrainer(session, newTrainer);
                 } else {
                     trainerToUpdate.setTName(tName);
@@ -232,16 +293,22 @@ public class TrainerDataController {
                 }
 
                 tr.commit();
-                if (trainerControllerTable != null) trainerControllerTable.showTrainers();
+                if (trainerControllerTable != null) {
+                    trainerControllerTable.showTrainers();
+                }
                 view.dispose();
                 JOptionPane.showMessageDialog(null, "Dane trenera zostały pomyślnie zapisane.");
 
             } catch (Exception ex) {
-                if (tr != null) tr.rollback();
+                if (tr != null) {
+                    tr.rollback();
+                }
                 LOGGER.log(Level.SEVERE, "Błąd zapisu trenera.", ex);
                 JOptionPane.showMessageDialog(view, "Błąd bazy danych: " + ex.getMessage());
             } finally {
-                if (session != null) session.close();
+                if (session != null) {
+                    session.close();
+                }
             }
         }
     }

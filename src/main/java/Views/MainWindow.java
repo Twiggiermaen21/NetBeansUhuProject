@@ -60,7 +60,6 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setForeground(java.awt.Color.white);
         setMinimumSize(new java.awt.Dimension(900, 450));
-        setPreferredSize(new java.awt.Dimension(900, 450));
 
         viewNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         viewNameLabel.setText("Panel Główny");
@@ -91,6 +90,8 @@ public class MainWindow extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        dataTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        dataTable.setRowHeight(25);
         jScrollPane1.setViewportView(dataTable);
 
         jNowy.setBackground(new java.awt.Color(102, 255, 0));
@@ -392,7 +393,7 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JPanel jPanelCalculate;
     public javax.swing.JPanel jPanelClientToActivity;
     public javax.swing.JPanel jPanelSearch;
-    private javax.swing.JScrollPane jScrollPane1;
+    public javax.swing.JScrollPane jScrollPane1;
     public javax.swing.JComboBox<String> jSearchBox;
     public javax.swing.JLabel jSearchIcon;
     public javax.swing.JTextField jSearchText;
@@ -421,17 +422,44 @@ public class MainWindow extends javax.swing.JFrame {
      * Uzupełnia tabelę danymi i nazwami kolumn. Dodatkowo blokuje możliwość
      * ręcznej edycji komórek przez użytkownika.
      */
-   public void setTableData(String[] columnNames, Object[][] data) {
+  public void setTableData(String[] columnNames, Object[][] data) {
     javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(data, columnNames) {
         @Override
         public boolean isCellEditable(int row, int column) {
             return false;
         }
+
+        @Override
+        public Class<?> getColumnClass(int column) {
+            // Sprawdzamy, co jest w pierwszej komórce danej kolumny
+            if (getRowCount() > 0 && getValueAt(0, column) != null) {
+                return getValueAt(0, column).getClass();
+            }
+            return Object.class;
+        }
     };
-    dataTable.setModel(model);
     
-    // Po ustawieniu modelu, skonfiguruj sorter i kolumny w jSearchBox
-    setupTableSorter(); 
+  dataTable.setModel(model);
+
+    if (data.length > 0 && data[0][0] instanceof javax.swing.Icon) {
+        javax.swing.Icon icon = (javax.swing.Icon) data[0][0];
+        
+        // Ustawienie wysokości wiersza na dokładnie taką jak zdjęcie
+        dataTable.setRowHeight(icon.getIconHeight());
+        
+        // Ustawienie szerokości kolumny na dokładnie taką jak zdjęcie
+        dataTable.getColumnModel().getColumn(0).setPreferredWidth(icon.getIconWidth());
+        
+        // Wyłączenie nagłówka (opcjonalnie), aby zdjęcie wyglądało lepiej
+        dataTable.getTableHeader().setVisible(false);
+        jScrollPane1.setColumnHeaderView(null);
+    } else {
+        dataTable.setRowHeight(25);
+        dataTable.getTableHeader().setVisible(true);
+        // Przywrócenie nagłówka dla normalnych danych
+        jScrollPane1.setColumnHeaderView(dataTable.getTableHeader());
+        autoResizeColumns();
+    }
 }
     
 
@@ -609,5 +637,28 @@ public void addTableSelectionListener(javax.swing.event.ListSelectionListener ls
     dataTable.getSelectionModel().addListSelectionListener(lsl);
 }
 
+  public void autoResizeColumns() {
+    dataTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
     
+    for (int column = 0; column < dataTable.getColumnCount(); column++) {
+        javax.swing.table.TableColumn tableColumn = dataTable.getColumnModel().getColumn(column);
+        
+        // 1. Sprawdź szerokość NAGŁÓWKA (Tytułu kolumny)
+        javax.swing.table.TableCellRenderer headerRenderer = dataTable.getTableHeader().getDefaultRenderer();
+        java.awt.Component headerComp = headerRenderer.getTableCellRendererComponent(
+                dataTable, tableColumn.getHeaderValue(), false, false, 0, column);
+        int width = headerComp.getPreferredSize().width + 20; // +20 dla marginesu i strzałki sortowania
+
+        // 2. Sprawdź szerokość KOMÓREK w tej kolumnie
+        for (int row = 0; row < dataTable.getRowCount(); row++) {
+            javax.swing.table.TableCellRenderer cellRenderer = dataTable.getCellRenderer(row, column);
+            java.awt.Component c = dataTable.prepareRenderer(cellRenderer, row, column);
+            int cellWidth = c.getPreferredSize().width + dataTable.getIntercellSpacing().width + 10;
+            width = Math.max(width, cellWidth);
+        }
+
+        // 3. Ustaw ostateczną szerokość
+        tableColumn.setPreferredWidth(width);
+    }
+}
 }
