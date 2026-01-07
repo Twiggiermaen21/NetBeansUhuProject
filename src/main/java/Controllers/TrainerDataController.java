@@ -233,7 +233,7 @@ public class TrainerDataController {
 
             // 2a. WALIDACJA DNI (8 cyfr + wielka litera)
             if (!tIdNumber.matches("\\d{8}[A-Z]")) {
-                JOptionPane.showMessageDialog(view, "Format ID musi zawierać 8 cyfr i jedną wielką literę.", "Błąd formatu", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(view, "Format ID musi zawierać 8 cyfr i jedną wielką literę na końcu.", "Błąd formatu", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
