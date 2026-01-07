@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Documentation - Messi GOAT GYM</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 50px;
+            border-left: 6px solid #2980b9;
+            padding-left: 15px;
+            font-size: 1.8em;
+        }
+        h3 {
+            color: #16a085;
+            margin-top: 30px;
+            font-size: 1.4em;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .file-section {
+            background: #fff;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e1e4e8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        th {
+            background-color: #34495e;
+            color: #fff;
+            width: 35%;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        code {
+            background-color: #f1f3f5;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #c0392b;
+            font-size: 0.95em;
+            display: inline-block;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            border-radius: 4px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .badge-dao { background-color: #8e44ad; }
+        .badge-view { background-color: #27ae60; }
+        .badge-model { background-color: #d35400; }
+        .badge-controller { background-color: #2980b9; }
+        .badge-config { background-color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+    <h1>Project Documentation: Messi GOAT GYM</h1>
+    <p>Detailed technical reference for the gym management system, covering Controllers, DAOs, Views, and Entity Models.</p>
+
+    <h2>Configuration & Utilities <span class="badge badge-config">CONFIG</span></h2>
+    <p>Infrastructure classes for database connectivity.</p>
+
+    <div class="file-section">
+        <h3>HibernateUtil.java</h3>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>buildSessionFactory(String user, String pass)</code></td>
+                <td>Dynamically configures Hibernate. Overrides <code>hibernate.connection.username</code>, <code>password</code>, and <code>url</code> properties at runtime based on user input. Builds the <code>ServiceRegistry</code> and returns a <code>SessionFactory</code>.</td>
+            </tr>
+            <tr>
+                <td><code>getSessionFactory()</code></td>
+                <td>Returns the static singleton instance of the session factory.</td>
+            </tr>
+            <tr>
+                <td><code>close()</code></td>
+                <td>Safely shuts down the `SessionFactory` and destroys the `StandardServiceRegistry` to release JDBC resources.</td>
+            </tr>
+        </table>
+    </div>
+
+    <h2>Controller Layer (Logic) <span class="badge badge-controller">CONTROLLER</span></h2>
+    <p>Orchestrates data flow between the GUI (View) and the Database (DAO).</p>
+
+    <div class="file-section">
+        <h3>MainController.java</h3>
+        <p>The central nervous system of the application.</p>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>MainController(SessionFactory sessionFactory)</code></td>
+                <td>Constructor. Initializes the main view, instantiates sub-controllers (Tables), registers listeners, and sets the initial "Init" screen.</td>
+            </tr>
+            <tr>
+                <td><code>refreshActivityCombo()</code></td>
+                <td>Fetches activities via DAO and populates the enrollment ComboBox. Uses a custom cell renderer to display <code>getAName()</code> instead of object hash codes.</td>
+            </tr>
+            <tr>
+                <td><code>initTableSelectionLogic()</code></td>
+                <td>Adds a listener to the main table. When a Client row is selected, it auto-fills the "Client Name" field in the enrollment panel.</td>
+            </tr>
+            <tr>
+                <td><code>handleSaveEnrollment(String clientCode, Activity activity)</code></td>
+                <td><strong>Many-to-Many Logic:</strong> Fetches the Client and Activity entities, adds the Client to the Activity's <code>clientSet</code>, and commits the transaction.</td>
+            </tr>
+            <tr>
+                <td><code>actionPerformed(ActionEvent e)</code></td>
+                <td>Handles navigation (Menu clicks). Switches views (Client/Trainer/Activity), updates button labels, and toggles panel visibility.</td>
+            </tr>
+            <tr>
+                <td><code>handleFormAction(Object entity, String type)</code></td>
+                <td>Factory method for forms. Opens <code>DataUpdateWindow</code> and assigns the correct specific controller (Client/Trainer/Activity DataController) based on context.</td>
+            </tr>
+            <tr>
+                <td><code>deleteEntity(String type, String code)</code></td>
+                <td>Executes deletion via the appropriate DAO based on the current view context and refreshes the table upon success.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>ConnectionController.java</h3>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>appEntry()</code></td>
+                <td>Retrieves credentials from <code>ConnectionView</code>. Calls <code>HibernateUtil.buildSessionFactory</code>. If successful, launches <code>MainController</code>; otherwise, shows error.</td>
+            </tr>
+            <tr>
+                <td><code>exitApplication()</code></td>
+                <td>Calls <code>HibernateUtil.close()</code> and terminates the JVM (`System.exit(0)`).</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>ClientDataController.java</h3>
+        <p>Handles the "Add/Edit Client" form logic.</p>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>initializeForm()</code></td>
+                <td>Configures form labels for Clients. If adding new: calls <code>initializeFormWithAutoData</code>. If editing: calls <code>populateForm</code>.</td>
+            </tr>
+            <tr>
+                <td><code>generateNextMemberNumber(String maxNum)</code></td>
+                <td>Parses the highest current ID (e.g., "S005"), increments the integer part, and formats the new ID (e.g., "S006").</td>
+            </tr>
+            <tr>
+                <td><code>FormSubmitListener.actionPerformed</code></td>
+                <td><strong>Validation Logic:</strong> Checks required fields, DNI format (8 digits+Char), Email regex, and Age (>18). Checks ID uniqueness via DAO before saving.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>TrainerDataController.java</h3>
+        <p>Handles the "Add/Edit Trainer" form logic.</p>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>generateNextTrainerCode(String maxNum)</code></td>
+                <td>Generates sequential Trainer IDs (e.g., T001 -> T002).</td>
+            </tr>
+            <tr>
+                <td><code>FormSubmitListener.actionPerformed</code></td>
+                <td>Validates inputs (ID format, non-future dates). Ensures the Trainer ID is unique in the DB before calling <code>insertTrainer</code> or <code>updateTrainer</code>.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>ActivityDataController.java</h3>
+        <p>Handles the "Add/Edit Activity" form logic.</p>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>fillTrainerComboBox()</code></td>
+                <td>Fetches all trainers and populates the dropdown, allowing the user to assign a trainer to the activity.</td>
+            </tr>
+            <tr>
+                <td><code>FormSubmitListener.actionPerformed</code></td>
+                <td><strong>Conflict Check:</strong> Calls <code>activityDAO.isTrainerOccupied</code> to ensure the selected trainer isn't already teaching at that Day/Time. Prevents double-booking.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>Table Helpers (Client/Trainer/ActivityControllerTable)</h3>
+        <p>Utils responsible for fetching lists and refreshing the main JTable.</p>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>showClients() / showTrainers() / showActivities()</code></td>
+                <td>Executes HQL queries to fetch all records. Maps the Entity objects into a 2D Object array (<code>Object[][]</code>) matching the table columns and updates the View.</td>
+            </tr>
+            <tr>
+                <td><code>getSelected[Entity]()</code></td>
+                <td>Resolves the selected table row index to the actual Entity object (using cached lists or DB lookups) to prepare for Edit/Delete operations.</td>
+            </tr>
+            <tr>
+                <td><code>handleCalculateStats()</code> (ActivityTable only)</td>
+                <td>Calculates: 1. Total Participants, 2. Average Age, 3. Revenue (applying Category B/C/D discounts), 4. Top Category. Opens <code>CalculateWindow</code>.</td>
+            </tr>
+        </table>
+    </div>
+
+    <h2>Data Access Layer (DAO) <span class="badge badge-dao">DAO</span></h2>
+    <p>Classes responsible for direct interaction with the database using Hibernate Session.</p>
+
+    <div class="file-section">
+        <h3>ActivityDAO.java</h3>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>insertActivity(Session session, Activity activity)</code></td>
+                <td>Persists a transient <code>Activity</code> instance into the database using <code>session.persist()</code>.</td>
+            </tr>
+            <tr>
+                <td><code>isTrainerOccupied(...)</code></td>
+                <td>Executes an HQL COUNT query to check if a specific trainer is already assigned to an activity on the given day and hour.</td>
+            </tr>
+            <tr>
+                <td><code>getMaxActivityCode(Session session)</code></td>
+                <td>Executes a query sorting Activity IDs in descending order and limits results to 1 to find the current highest ID.</td>
+            </tr>
+            <tr>
+                <td><code>findAllActivities(Session session)</code></td>
+                <td>Executes a generic HQL query <code>SELECT a FROM Activity a</code> to return a List of all registered activities.</td>
+            </tr>
+             <tr>
+                <td><code>getActivityStatisticsById(...)</code></td>
+                <td>Performs a <code>LEFT JOIN</code> between Activity and Client sets. Returns an <code>Object[]</code> with Name and Client Count.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>ClientDAO.java</h3>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>existDNI(Session session, String dni)</code></td>
+                <td>Checks if a client with the specific Personal ID (DNI/PESEL) exists. Used for validation before insertion.</td>
+            </tr>
+            <tr>
+                <td><code>insertClient / updateClient</code></td>
+                <td>Standard Hibernate persistence methods (persist/merge) for the Client entity.</td>
+            </tr>
+            <tr>
+                <td><code>getAllClients(Session session)</code></td>
+                <td>Retrieves all rows from the CLIENT table mapped to the Client class.</td>
+            </tr>
+            <tr>
+                <td><code>getMaxMemberNumber(Session session)</code></td>
+                <td>Returns the string value of the highest <code>mNum</code> currently in the database. Used for ID auto-generation.</td>
+            </tr>
+            <tr>
+                <td><code>getGlobalStatistics(Session session)</code></td>
+                <td>Aggregates complex data: Total clients, List of birthdates (for avg age), and List of Categories/Prices (for revenue).</td>
+            </tr>
+            <tr>
+                <td><code>getStatisticsForActivity(...)</code></td>
+                <td>Similar to global stats, but filtered by Activity ID via JOIN to analyze a specific class.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>TrainerDAO.java</h3>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>insertTrainer</code> / <code>updateTrainer</code></td>
+                <td>Persists new Trainer entities or updates existing ones in the database.</td>
+            </tr>
+            <tr>
+                <td><code>existTrainerID(Session session, String id)</code></td>
+                <td>Checks if a Trainer with a specific government ID/DNI (<code>tidNumber</code>) already exists.</td>
+            </tr>
+            <tr>
+                <td><code>getMaxTrainerCode(Session session)</code></td>
+                <td>Fetches the highest alphanumeric Trainer Code (e.g., "T099") to assist in generating the next sequential code.</td>
+            </tr>
+            <tr>
+                <td><code>findAllTrainers(Session session)</code></td>
+                <td>Returns a complete list of Trainer entities.</td>
+            </tr>
+        </table>
+    </div>
+
+    <h2>View Layer (GUI) <span class="badge badge-view">View</span></h2>
+    <p>Swing-based classes responsible for the user interface and presentation logic.</p>
+
+    <div class="file-section">
+        <h3>MainWindow.java</h3>
+        <p>The core application window.</p>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>setTableData(String[] columnNames, Object[][] data)</code></td>
+                <td>Initializes the <code>JTable</code> model. Detects if data contains Images (for Init screen) or Text, adjusting row heights and headers accordingly.</td>
+            </tr>
+            <tr>
+                <td><code>filterTable()</code></td>
+                <td>Applies a regex filter to the <code>TableRowSorter</code> based on the text in <code>jSearchText</code> and selected column.</td>
+            </tr>
+            <tr>
+                <td><code>autoResizeColumns()</code></td>
+                <td>Iterates through columns/rows to calculate preferred width and resizes columns for optimal visibility.</td>
+            </tr>
+            <tr>
+                <td><code>getSelectedValueAt(int columnIndex)</code></td>
+                <td>Converts <strong>View Index</strong> to <strong>Model Index</strong> to ensure the correct record is selected even when the table is sorted/filtered.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>DataUpdateWindow.java</h3>
+        <p>Polymorphic form for creating/editing entities.</p>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>getSelectedDate()</code> / <code>setSelectedDate(Date date)</code></td>
+                <td>Interacts with the <code>JDateChooser</code> component to handle date fields.</td>
+            </tr>
+            <tr>
+                <td><code>setFieldLabels(...)</code></td>
+                <td>Renames <code>JLabel</code> components dynamically, allowing the same window to serve as Client, Trainer, or Activity form.</td>
+            </tr>
+            <tr>
+                <td><code>setFieldVisible(Object field, boolean visible)</code></td>
+                <td>Toggles visibility of specific UI components (e.g., hiding "Birthday" when adding an Activity).</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>CalculateWindow.java</h3>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>setResults(int total, double avgAge, String topCat, double revenue)</code></td>
+                <td>Populates the GUI text fields with pre-calculated statistical data provided by the controller.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="file-section">
+        <h3>ConnectionView.java</h3>
+        <table>
+            <tr>
+                <th>Method Signature</th>
+                <th>Precise Functionality</th>
+            </tr>
+            <tr>
+                <td><code>getUsername()</code> / <code>getPassword()</code></td>
+                <td>Extracts raw text from the login fields.</td>
+            </tr>
+            <tr>
+                <td><code>addConnectListener(ActionListener al)</code></td>
+                <td>Registers the controller's logic to the "Login" button.</td>
+            </tr>
+        </table>
+    </div>
+
+    <h2>Model Layer (Entities) <span class="badge badge-model">Model</span></h2>
+    <p>POJO classes annotated with JPA/Hibernate metadata.</p>
+
+    <div class="file-section">
+        <h3>Activity.java</h3>
+        <ul>
+            <li><strong>Fields:</strong> <code>aId</code> (PK), <code>aName</code>, <code>aDescription</code>, <code>aPrice</code>, <code>aDay</code>, <code>aHour</code>.</li>
+            <li><strong>Relationships:</strong>
+                <ul>
+                    <li><code>@ManyToMany</code> with <code>Client</code> (via <code>PERFORMS</code> table).</li>
+                    <li><code>@ManyToOne</code> with <code>Trainer</code> (mapped by <code>atrainerInCharge</code>).</li>
+                </ul>
+            </li>
+            <li><code>getDisplayName()</code>: Helper returning <code>aName</code> for UI display.</li>
+        </ul>
+    </div>
+
+    <div class="file-section">
+        <h3>Client.java</h3>
+        <ul>
+            <li><strong>Fields:</strong> <code>mNum</code> (PK), <code>mName</code>, <code>mId</code> (Gov ID), <code>mBirthdate</code>, <code>mPhone</code>, <code>memailMember</code>, <code>mstartingDateMember</code>, <code>mcategoryMember</code>.</li>
+            <li><strong>Relationships:</strong> <code>@ManyToMany</code> with <code>Activity</code> (inverse side).</li>
+            <li><strong>NamedQueries:</strong> Pre-compiled HQL queries for efficient searching.</li>
+        </ul>
+    </div>
+
+    <div class="file-section">
+        <h3>Trainer.java</h3>
+        <ul>
+            <li><strong>Fields:</strong> <code>tCod</code> (PK), <code>tName</code>, <code>tidNumber</code>, <code>tphoneNumber</code>, <code>tEmail</code>, <code>tDate</code>, <code>tNick</code>.</li>
+            <li><strong>Relationships:</strong> <code>@OneToMany</code> with <code>Activity</code>.</li>
+            <li><code>toString()</code>: Overridden to return <code>tName</code> for correct display in JComboBoxes.</li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Messi GOAT GYM System Documentation. Generated for technical review.</p>
+    </footer>
+
+</body>
+</html>
