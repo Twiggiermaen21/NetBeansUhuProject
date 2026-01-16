@@ -459,6 +459,7 @@ public class MainWindow extends javax.swing.JFrame {
         // Przywrócenie nagłówka dla normalnych danych
         jScrollPane1.setColumnHeaderView(dataTable.getTableHeader());
         autoResizeColumns();
+        setupTableSorter();
     }
 }
     
