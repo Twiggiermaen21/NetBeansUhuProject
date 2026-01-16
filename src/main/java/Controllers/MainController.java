@@ -256,32 +256,37 @@ public class MainController implements ActionListener {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-        switch (e.getActionCommand()) {
-            case "ShowClients" -> {
-                resetTableSize(); // <--- Dodaj tutaj
-                clientControllerTable.showClients();
-                view.setButtonLabels("Dodaj Klienta", "Usuń Klienta", "Edytuj Klienta");
-                currentView = "Client";
-                updatePanelVisibility(true, false, true);
-            }
-            case "ShowTrainers" -> {
-                resetTableSize(); // <--- Dodaj tutaj
-                trainerControllerTable.showTrainers();
-                view.setButtonLabels("Dodaj Trenera", "Usuń Trenera", "Edytuj Trenera");
-                currentView = "Trainer";
-                updatePanelVisibility(true, false, false);
-            }
-            case "ShowActivities" -> {
-                resetTableSize(); // <--- Dodaj tutaj
-                activityControllerTable.showActivities();
-                view.setButtonLabels("Dodaj Aktywność", "Usuń Aktywność", "Edytuj Aktywność");
-                currentView = "Activity";
-                updatePanelVisibility(true, true, false);
-            }
-            case "ShowInit" ->
-                showInit();
+    // Wywołaj czyszczenie przed zmianą danych (opcjonalnie przed switchem lub w każdym case)
+    view.clearSearchFields(); 
+     view.setupTableSorter();
+    switch (e.getActionCommand()) {
+        case "ShowClients" -> {
+            resetTableSize();
+            clientControllerTable.showClients();
+            view.setButtonLabels("Dodaj Klienta", "Usuń Klienta", "Edytuj Klienta");
+            currentView = "Client";
+            updatePanelVisibility(true, false, true);
+            view.setupTableSorter();
         }
+        case "ShowTrainers" -> {
+            resetTableSize();
+            trainerControllerTable.showTrainers();
+            view.setButtonLabels("Dodaj Trenera", "Usuń Trenera", "Edytuj Trenera");
+            currentView = "Trainer";
+            updatePanelVisibility(true, false, false);
+            view.setupTableSorter();
+        }
+        case "ShowActivities" -> {
+            resetTableSize();
+            activityControllerTable.showActivities();
+            view.setButtonLabels("Dodaj Aktywność", "Usuń Aktywność", "Edytuj Aktywność");
+            currentView = "Activity";
+            updatePanelVisibility(true, true, false);
+            view.setupTableSorter();
+        }
+        case "ShowInit" -> showInit();
     }
+}
 
     /**
      * Zarządza widocznością paneli interfejsu użytkownika w zależności od
@@ -490,6 +495,7 @@ public class MainController implements ActionListener {
         view.pack();
         view.revalidate();
         view.repaint();
+      
     }
 
 }

@@ -20,6 +20,7 @@ public class MainWindow extends javax.swing.JFrame {
         initializeMenuItems();
         initSearchListeners(); // <--- DODAJ TO
         setLocationRelativeTo(null);
+       
     }
 
     /**
@@ -459,7 +460,7 @@ public class MainWindow extends javax.swing.JFrame {
         // Przywrócenie nagłówka dla normalnych danych
         jScrollPane1.setColumnHeaderView(dataTable.getTableHeader());
         autoResizeColumns();
-        setupTableSorter();
+        
     }
 }
     
@@ -617,7 +618,20 @@ public void initSearchListeners() {
     // Reaguj na zmianę kolumny w ComboBox
     jSearchBox.addActionListener(e -> filterTable());
 }
-
+public void clearSearchFields() {
+    // 1. Czyścimy pole tekstowe
+    jSearchText.setText("");
+    
+    // 2. Resetujemy filtr sortera (żeby pokazać wszystkie wiersze w nowym widoku)
+    if (sorter != null) {
+        sorter.setRowFilter(null);
+    }
+    
+    // 3. Opcjonalnie: ustawiamy wybór w ComboBox na pierwszą pozycję
+    if (jSearchBox.getItemCount() > 0) {
+        jSearchBox.setSelectedIndex(0);
+    }
+}
 
 public void setClientToActivityName(String name) {
     jTextFieldClientToActivity.setText(name);
@@ -638,28 +652,41 @@ public void addTableSelectionListener(javax.swing.event.ListSelectionListener ls
     dataTable.getSelectionModel().addListSelectionListener(lsl);
 }
 
-  public void autoResizeColumns() {
+public void autoResizeColumns() {
     dataTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
     
-    for (int column = 0; column < dataTable.getColumnCount(); column++) {
+    // Pobieramy liczbę wierszy i kolumn raz, aby uniknąć niespójności
+    int rowCount = dataTable.getRowCount();
+    int columnCount = dataTable.getColumnCount();
+
+    for (int column = 0; column < columnCount; column++) {
         javax.swing.table.TableColumn tableColumn = dataTable.getColumnModel().getColumn(column);
         
-        // 1. Sprawdź szerokość NAGŁÓWKA (Tytułu kolumny)
+        // 1. Szerokość NAGŁÓWKA
         javax.swing.table.TableCellRenderer headerRenderer = dataTable.getTableHeader().getDefaultRenderer();
         java.awt.Component headerComp = headerRenderer.getTableCellRendererComponent(
                 dataTable, tableColumn.getHeaderValue(), false, false, 0, column);
-        int width = headerComp.getPreferredSize().width + 20; // +20 dla marginesu i strzałki sortowania
+        int width = headerComp.getPreferredSize().width + 20;
 
-        // 2. Sprawdź szerokość KOMÓREK w tej kolumnie
-        for (int row = 0; row < dataTable.getRowCount(); row++) {
-            javax.swing.table.TableCellRenderer cellRenderer = dataTable.getCellRenderer(row, column);
-            java.awt.Component c = dataTable.prepareRenderer(cellRenderer, row, column);
-            int cellWidth = c.getPreferredSize().width + dataTable.getIntercellSpacing().width + 10;
-            width = Math.max(width, cellWidth);
+        // 2. Szerokość KOMÓREK - dodajemy zabezpieczenie rowCount
+        for (int row = 0; row < rowCount; row++) {
+            try {
+                // Sprawdzamy dodatkowo, czy wiersz nadal istnieje w modelu
+                if (row < dataTable.getModel().getRowCount()) {
+                    javax.swing.table.TableCellRenderer cellRenderer = dataTable.getCellRenderer(row, column);
+                    java.awt.Component c = dataTable.prepareRenderer(cellRenderer, row, column);
+                    int cellWidth = c.getPreferredSize().width + dataTable.getIntercellSpacing().width + 10;
+                    width = Math.max(width, cellWidth);
+                }
+            } catch (Exception e) {
+                // Jeśli w trakcie pętli dane się zmienią, przerywamy pomiar dla tej kolumny
+                break; 
+            }
         }
 
-        // 3. Ustaw ostateczną szerokość
+        // 3. Ustawienie szerokości
         tableColumn.setPreferredWidth(width);
     }
 }
 }
+
