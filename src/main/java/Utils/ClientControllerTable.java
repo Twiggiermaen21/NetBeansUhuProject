@@ -114,4 +114,23 @@ public class ClientControllerTable {
         LOGGER.fine("Nie zaznaczono żadnego klienta.");
         return null;
     }
+    
+    
+    
+    public void addNewRowToTable(Object[] rowData) {
+    // Pobieramy model z tabeli znajdującej się w widoku głównym
+    javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) view.dataTable.getModel();
+    
+    // Dodajemy wiersz do modelu - JTable odświeży się automatycznie
+    model.addRow(rowData);
+    
+    // Opcjonalnie: przesuń widok do nowego wiersza i zaznacz go
+    int lastRow = model.getRowCount() - 1;
+    view.dataTable.setRowSelectionInterval(lastRow, lastRow);
+    view.dataTable.scrollRectToVisible(view.dataTable.getCellRect(lastRow, 0, true));
+    
+    // Ważne: zaktualizuj rozmiar kolumn po dodaniu nowych danych
+    view.autoResizeColumns();
+}
+    
 }

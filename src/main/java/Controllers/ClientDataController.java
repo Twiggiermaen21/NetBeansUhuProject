@@ -295,7 +295,21 @@ public class ClientDataController {
 
                 tr.commit();
                 if (clientControllerTable != null) {
-                    clientControllerTable.showClients();
+                    if (clientToUpdate == null) {
+                        Object[] newRow = new Object[]{
+                            mNum,
+                            mName,
+                            mId,
+                            fmtEntryDate,
+                            catChar,
+                            mPhone,
+                            mEmail,
+                            fmtBirthDate
+                        };
+                        clientControllerTable.addNewRowToTable(newRow);
+                    } else {
+                        clientControllerTable.showClients();
+                    }
                 }
                 view.dispose();
                 JOptionPane.showMessageDialog(null, "Dane zostały pomyślnie zapisane.");

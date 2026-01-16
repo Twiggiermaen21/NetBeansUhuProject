@@ -80,6 +80,20 @@ public class TrainerControllerTable {
         }
         return trainer;
     }
+    
+    
+    public void addNewRowToTable(Object[] rowData) {
+    javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) view.dataTable.getModel();
+    model.addRow(rowData);
+    
+    // Zaznacz nowy wiersz na końcu
+    int lastRow = model.getRowCount() - 1;
+    view.dataTable.setRowSelectionInterval(lastRow, lastRow);
+    view.dataTable.scrollRectToVisible(view.dataTable.getCellRect(lastRow, 0, true));
+    
+    // Dopasuj szerokość kolumn do nowej treści
+    view.autoResizeColumns();
+}
 
     // =========================================================================
     // WYŚWIETLANIE WSZYSTKICH DANYCH (READ)

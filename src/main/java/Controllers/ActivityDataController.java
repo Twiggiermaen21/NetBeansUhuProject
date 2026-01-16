@@ -12,8 +12,6 @@ import Utils.ActivityControllerTable;
 import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,8 +79,8 @@ public class ActivityDataController {
         this.activityControllerTable = activityControllerTable;
         this.activityToUpdate = activityToUpdate;
         this.trainerDAO = new TrainerDAO();
-view.jTelefon.setPreferredSize(new java.awt.Dimension(235, 25));
-    view.jTelefon.setMinimumSize(new java.awt.Dimension(235, 25));
+        view.jTelefon.setPreferredSize(new java.awt.Dimension(235, 25));
+        view.jTelefon.setMinimumSize(new java.awt.Dimension(235, 25));
         // Rejestracja słuchaczy zdarzeń
         this.view.addAkceptujListener(new FormSubmitListener());
         this.view.addAnulujListener(e -> view.dispose());
@@ -96,15 +94,15 @@ view.jTelefon.setPreferredSize(new java.awt.Dimension(235, 25));
     public void initializeForm() {
         view.setFieldLabels("Nazwa Aktywności", "Opis/Typ", "Cena (PLN)",
                 "Dzień Tygodnia", "Data", "Trener", "Godzina");
-view.jComboBoxDay.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{
-        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-    }));
+        view.jComboBoxDay.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+        }));
 
-    view.jComboBoxTime.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{
-        "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", 
-        "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
-    }));
-    fillTrainerComboBox();
+        view.jComboBoxTime.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{
+            "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+            "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
+        }));
+        fillTrainerComboBox();
         view.jDateChooser.setVisible(true);
         view.jBirthdayChooser.setVisible(false);
         view.jKategoria.setVisible(false);
@@ -140,30 +138,33 @@ view.jComboBoxDay.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{
         view.setEmail(activityToUpdate.getADay());
 
 //        view.setSelectedDate(new java.util.Date());
-
         Trainer trainer = activityToUpdate.getAtrainerInCharge();
         view.setKategoria(trainer != null ? trainer.getTCod() : "");
     }
-private void fillTrainerComboBox() {
-    Session session = null;
-    try {
-        session = sessionFactory.openSession();
-        // 1. Teraz metoda findAllTrainers już istnieje w Twoim DAO
-        List<Trainer> trainers = trainerDAO.findAllTrainers(session);
-        
-        // 2. Rzutujemy na surowy typ, aby uniknąć błędów generyków JComboBox<String>
-        javax.swing.JComboBox combo = (javax.swing.JComboBox) view.jComboBoxTrener;
-        combo.removeAllItems();
-        
-        for (Trainer t : trainers) {
-            combo.addItem(t); 
+
+    private void fillTrainerComboBox() {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            // 1. Teraz metoda findAllTrainers już istnieje w Twoim DAO
+            List<Trainer> trainers = trainerDAO.findAllTrainers(session);
+
+            // 2. Rzutujemy na surowy typ, aby uniknąć błędów generyków JComboBox<String>
+            javax.swing.JComboBox combo = (javax.swing.JComboBox) view.jComboBoxTrener;
+            combo.removeAllItems();
+
+            for (Trainer t : trainers) {
+                combo.addItem(t);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Błąd pobierania trenerów", e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
-    } catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Błąd pobierania trenerów", e);
-    } finally {
-        if (session != null) session.close();
     }
-}
+
     /**
      * Inicjalizuje formularz domyślnymi wartościami oraz automatycznie
      * wygenerowanym kodem (tryb dodawania).
@@ -181,7 +182,7 @@ private void fillTrainerComboBox() {
             view.setNazwisko("");
             view.setNumerIdentyfikacyjny("");
             view.setTelefon("");
-            
+
             view.setSelectedDate(new java.util.Date());
             view.setKategoria("");
 
@@ -230,92 +231,113 @@ private void fillTrainerComboBox() {
      * zatwierdzenia. Odpowiada za walidację danych wejściowych, obsługę
      * transakcji Hibernate oraz zapis (INSERT/UPDATE) obiektu w bazie danych.
      */
-   private class FormSubmitListener implements ActionListener {
+    private class FormSubmitListener implements ActionListener {
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        // Pobieranie danych z komponentów tekstowych
-        String aIdFromForm = view.getKod().trim();
-        String aName = view.getNazwisko().trim();
-        String aDescription = getNullIfBlank(view.getNumerIdentyfikacyjny());
-        String priceStr = view.getTelefon().trim(); // Pole ceny
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Pobieranie danych z komponentów tekstowych
+            String aIdFromForm = view.getKod().trim();
+            String aName = view.getNazwisko().trim();
+            String aDescription = getNullIfBlank(view.getNumerIdentyfikacyjny());
+            String priceStr = view.getTelefon().trim(); // Pole ceny
 
-        // Pobieranie danych z ComboBoxów
-        String selectedDay = (String) view.jComboBoxDay.getSelectedItem();
-        String selectedTimeStr = (String) view.jComboBoxTime.getSelectedItem();
-        Trainer selectedTrainer = (Trainer) view.jComboBoxTrener.getSelectedItem();
+            // Pobieranie danych z ComboBoxów
+            String selectedDay = (String) view.jComboBoxDay.getSelectedItem();
+            String selectedTimeStr = (String) view.jComboBoxTime.getSelectedItem();
+            Trainer selectedTrainer = (Trainer) view.jComboBoxTrener.getSelectedItem();
 
-        // 1. Walidacja pól wymaganych
-        if (aIdFromForm.isEmpty() || aName.isEmpty() || priceStr.isEmpty() || selectedDay == null || selectedTimeStr == null) {
-            JOptionPane.showMessageDialog(view, "Wszystkie podstawowe pola muszą być wypełnione.", "Błąd", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        Session session = null;
-        Transaction tr = null;
-
-        try {
-            // 2. Walidacja ceny
-            int aPrice = Integer.parseInt(priceStr);
-            if (aPrice < 0) {
-                JOptionPane.showMessageDialog(view, "Cena nie może być ujemna!", "Błąd walidacji", JOptionPane.WARNING_MESSAGE);
+            // 1. Walidacja pól wymaganych
+            if (aIdFromForm.isEmpty() || aName.isEmpty() || priceStr.isEmpty() || selectedDay == null || selectedTimeStr == null) {
+                JOptionPane.showMessageDialog(view, "Wszystkie podstawowe pola muszą być wypełnione.", "Błąd", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // 3. Parsowanie godziny
-            int aHour = Integer.parseInt(selectedTimeStr.split(":")[0]);
+            Session session = null;
+            Transaction tr = null;
 
-            session = sessionFactory.openSession();
-
-            // 4. LOGIKA: Sprawdzenie dostępności trenera
-            if (selectedTrainer != null) {
-                // Jeśli edytujemy, bierzemy obecne ID, żeby nie blokować zapisu tej samej aktywności
-                String currentActivityId = (activityToUpdate != null) ? activityToUpdate.getAId() : null;
-                
-                boolean isBusy = activityDAO.isTrainerOccupied(session, selectedTrainer.getTCod(), selectedDay, aHour, currentActivityId);
-                
-                if (isBusy) {
-                    JOptionPane.showMessageDialog(view, 
-                        "Trener " + selectedTrainer.getTName() + " ma już przypisaną inną aktywność w " + selectedDay + " o godzinie " + aHour + ":00!", 
-                        "Konflikt w grafiku", 
-                        JOptionPane.ERROR_MESSAGE);
+            try {
+                // 2. Walidacja ceny
+                int aPrice = Integer.parseInt(priceStr);
+                if (aPrice < 0) {
+                    JOptionPane.showMessageDialog(view, "Cena nie może być ujemna!", "Błąd walidacji", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
+
+                // 3. Parsowanie godziny
+                int aHour = Integer.parseInt(selectedTimeStr.split(":")[0]);
+
+                session = sessionFactory.openSession();
+
+                // 4. LOGIKA: Sprawdzenie dostępności trenera
+                if (selectedTrainer != null) {
+                    // Jeśli edytujemy, bierzemy obecne ID, żeby nie blokować zapisu tej samej aktywności
+                    String currentActivityId = (activityToUpdate != null) ? activityToUpdate.getAId() : null;
+
+                    boolean isBusy = activityDAO.isTrainerOccupied(session, selectedTrainer.getTCod(), selectedDay, aHour, currentActivityId);
+
+                    if (isBusy) {
+                        JOptionPane.showMessageDialog(view,
+                                "Trener " + selectedTrainer.getTName() + " ma już przypisaną inną aktywność w " + selectedDay + " o godzinie " + aHour + ":00!",
+                                "Konflikt w grafiku",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+
+                // 5. Zapis/Aktualizacja
+                tr = session.beginTransaction();
+
+                if (activityToUpdate == null) {
+                    // Nowa aktywność
+                    Activity newActivity = new Activity(aIdFromForm, aName, aDescription, aPrice, selectedDay, aHour);
+                    newActivity.setAtrainerInCharge(selectedTrainer);
+                    activityDAO.insertActivity(session, newActivity);
+                } else {
+                    // Aktualizacja istniejącej
+                    activityToUpdate.setAName(aName);
+                    activityToUpdate.setADescription(aDescription);
+                    activityToUpdate.setAPrice(aPrice);
+                    activityToUpdate.setADay(selectedDay);
+                    activityToUpdate.setAHour(aHour);
+                    activityToUpdate.setAtrainerInCharge(selectedTrainer);
+                    activityDAO.updateActivity(session, activityToUpdate);
+                }
+
+                tr.commit();
+                if (activityControllerTable != null) {
+                    if (activityToUpdate == null) {
+                        // Składamy wiersz dla tabeli Aktywności
+                        Object[] newRow = new Object[]{
+                            aIdFromForm,
+                            aName,
+                            aDescription,
+                            aPrice,
+                            selectedDay,
+                            selectedTimeStr,
+                            (selectedTrainer != null ? selectedTrainer.getTName() : "Brak")
+                        };
+                        activityControllerTable.addNewRowToTable(newRow);
+                    } else {
+                        // Przy edycji najbezpieczniej odświeżyć całość, by zachować relacje
+                        activityControllerTable.showActivities();
+                    }
+                }
+                view.dispose();
+                JOptionPane.showMessageDialog(null, "Pomyślnie zapisano aktywność.");
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(view, "Cena musi być poprawną liczbą całkowitą.", "Błąd", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                if (tr != null) {
+                    tr.rollback();
+                }
+                LOGGER.log(Level.SEVERE, "Błąd bazy danych", ex);
+                JOptionPane.showMessageDialog(view, "Błąd bazy danych: " + ex.getMessage());
+            } finally {
+                if (session != null) {
+                    session.close();
+                }
             }
-
-            // 5. Zapis/Aktualizacja
-            tr = session.beginTransaction();
-
-            if (activityToUpdate == null) {
-                // Nowa aktywność
-                Activity newActivity = new Activity(aIdFromForm, aName, aDescription, aPrice, selectedDay, aHour);
-                newActivity.setAtrainerInCharge(selectedTrainer);
-                activityDAO.insertActivity(session, newActivity);
-            } else {
-                // Aktualizacja istniejącej
-                activityToUpdate.setAName(aName);
-                activityToUpdate.setADescription(aDescription);
-                activityToUpdate.setAPrice(aPrice);
-                activityToUpdate.setADay(selectedDay);
-                activityToUpdate.setAHour(aHour);
-                activityToUpdate.setAtrainerInCharge(selectedTrainer);
-                activityDAO.updateActivity(session, activityToUpdate);
-            }
-
-            tr.commit();
-            if (activityControllerTable != null) activityControllerTable.showActivities();
-            view.dispose();
-            JOptionPane.showMessageDialog(null, "Pomyślnie zapisano aktywność.");
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(view, "Cena musi być poprawną liczbą całkowitą.", "Błąd", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
-            if (tr != null) tr.rollback();
-            LOGGER.log(Level.SEVERE, "Błąd bazy danych", ex);
-            JOptionPane.showMessageDialog(view, "Błąd bazy danych: " + ex.getMessage());
-        } finally {
-            if (session != null) session.close();
         }
     }
-}
 }

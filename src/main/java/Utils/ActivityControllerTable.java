@@ -167,7 +167,18 @@ public class ActivityControllerTable {
         }
         return activity;
     }
-
+public void addNewRowToTable(Object[] rowData) {
+    javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) view.dataTable.getModel();
+    model.addRow(rowData);
+    
+    // Zaznacz nowy wiersz na końcu
+    int lastRow = model.getRowCount() - 1;
+    view.dataTable.setRowSelectionInterval(lastRow, lastRow);
+    view.dataTable.scrollRectToVisible(view.dataTable.getCellRect(lastRow, 0, true));
+    
+    // Dopasuj szerokość kolumn do nowej treści
+    view.autoResizeColumns();
+}
     /**
      * Pobiera listę wszystkich aktywności z bazy danych i odświeża widok tabeli 
      * w oknie głównym aplikacji. Metoda mapuje listę obiektów na format dwuwymiarowej 

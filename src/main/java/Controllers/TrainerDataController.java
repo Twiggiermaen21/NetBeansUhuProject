@@ -106,7 +106,7 @@ public class TrainerDataController {
         view.jComboBoxDay.setVisible(false);
         view.jComboBoxTime.setVisible(false);
         view.jComboBoxTrener.setVisible(false);
-        
+
         if (trainerToUpdate != null) {
             populateForm();
             view.jAkceptuj.setText("ZAPISZ ZMIANY");
@@ -294,7 +294,20 @@ public class TrainerDataController {
 
                 tr.commit();
                 if (trainerControllerTable != null) {
-                    trainerControllerTable.showTrainers();
+                    if (trainerToUpdate == null) {
+                        // Pobierz dane z pól widoku trenera
+                        Object[] newRow = new Object[]{
+                            view.getKod(),
+                            view.getNazwisko(), // Imię i Nazwisko
+                            view.getNumerIdentyfikacyjny(),
+                            view.getTelefon(),
+                            view.getEmail(),
+                            view.getKategoria() // np. Specjalizacja
+                        };
+                        trainerControllerTable.addNewRowToTable(newRow);
+                    } else {
+                        trainerControllerTable.showTrainers();
+                    }
                 }
                 view.dispose();
                 JOptionPane.showMessageDialog(null, "Dane trenera zostały pomyślnie zapisane.");

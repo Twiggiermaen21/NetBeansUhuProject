@@ -200,6 +200,7 @@ public class MainController implements ActionListener {
         });
     }
 
+    
     /**
      * Zapisuje powiązanie Many-to-Many między Klientem a Aktywnością.
      * Wykorzystuje sesję Hibernate do pobrania obiektów i aktualizacji zbioru
