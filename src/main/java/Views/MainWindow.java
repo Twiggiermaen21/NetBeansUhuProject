@@ -57,6 +57,7 @@ public class MainWindow extends javax.swing.JFrame {
         Clients = new javax.swing.JMenu();
         Trainers = new javax.swing.JMenu();
         Activities = new javax.swing.JMenu();
+        Performs = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setForeground(java.awt.Color.white);
@@ -284,6 +285,9 @@ public class MainWindow extends javax.swing.JFrame {
         Activities.setText("Activities");
         jMenuBar1.add(Activities);
 
+        Performs.setText("Performs");
+        jMenuBar1.add(Performs);
+
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -373,12 +377,16 @@ public class MainWindow extends javax.swing.JFrame {
         initMenuItem.setActionCommand("ShowInit");
         initMenuItem.addActionListener(al);
     }
-
+  public void addPerformsMenuListener(java.awt.event.ActionListener al) {
+        performsMenuItem.setActionCommand("ShowPerforms");
+        performsMenuItem.addActionListener(al);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JMenu Activities;
     public javax.swing.JMenu Clients;
     public javax.swing.JMenu Main;
+    public javax.swing.JMenu Performs;
     public javax.swing.JMenu Trainers;
     public javax.swing.JTable dataTable;
     public javax.swing.JButton jAktualizuj;
@@ -407,6 +415,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem trainerManagerMenuItem; // dla Trainers
     private javax.swing.JMenuItem activitiesManagerMenuItem; // dla Activities
     private javax.swing.JMenuItem initMenuItem; // dla Main (Init)
+    private javax.swing.JMenuItem performsMenuItem; 
     // ...
 // =================================================================
     // API WIDOKU - Metody do komunikacji z Kontrolerem
@@ -424,6 +433,10 @@ public class MainWindow extends javax.swing.JFrame {
      * ręcznej edycji komórek przez użytkownika.
      */
   public void setTableData(String[] columnNames, Object[][] data) {
+    // --- POPRAWKA: Wyłączamy stary sorter, aby nie gryzł się z nowymi danymi ---
+    dataTable.setRowSorter(null);
+    // -------------------------------------------------------------------------
+
     javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(data, columnNames) {
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -440,7 +453,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     };
     
-  dataTable.setModel(model);
+    dataTable.setModel(model);
 
     if (data.length > 0 && data[0][0] instanceof javax.swing.Icon) {
         javax.swing.Icon icon = (javax.swing.Icon) data[0][0];
@@ -537,7 +550,11 @@ public class MainWindow extends javax.swing.JFrame {
             activitiesManagerMenuItem = new javax.swing.JMenuItem("Activities Manager");
             Activities.add(activitiesManagerMenuItem);
         }
-
+        if (performsMenuItem == null) {
+            performsMenuItem = new javax.swing.JMenuItem("Performs Activity");
+            Performs.add(performsMenuItem);
+        }
+        
         if (initMenuItem == null) {
             initMenuItem = new javax.swing.JMenuItem("Initialize");
             Main.add(initMenuItem);
