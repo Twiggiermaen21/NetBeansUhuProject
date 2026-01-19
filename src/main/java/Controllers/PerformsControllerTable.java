@@ -2,7 +2,6 @@ package Controllers;
 
 import Models.Activity;
 import Models.ActivityDAO;
-
 import Models.Client;
 import Views.MainWindow;
 import java.util.List;
@@ -12,6 +11,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+/**
+ * Kontroler zarządzający powiązaniami między Aktywnościami a Klientami (tabela PERFORMS).
+ * Odpowiada za wyświetlanie, usuwanie i edycję zapisów w tabeli asocjacyjnej Many-to-Many.
+ */
 public class PerformsControllerTable {
 
     private final SessionFactory sessionFactory;
@@ -23,15 +26,21 @@ public class PerformsControllerTable {
         this.view = view;
     }
 
+    /**
+     * Pobiera z bazy danych listę wszystkich zapisów (relacji klient-aktywność)
+     * i odświeża widok tabeli w oknie głównym.
+     */
     public void showPerforms() {
         Session session = sessionFactory.openSession();
         try {
+            // HQL łączący Aktywność z kolekcją klientów (clientSet)
             String hql = "SELECT a.aId, a.aName, c.mNum, c.mName, c.mId " +
                          "FROM Activity a JOIN a.clientSet c";
             
             Query<Object[]> query = session.createQuery(hql, Object[].class);
             List<Object[]> results = query.list();
 
+            // Definicja nagłówków tabeli dla widoku
             String[] columnNames = {
                 "ID Aktywności", 
                 "Nazwa Aktywności", 
@@ -40,17 +49,19 @@ public class PerformsControllerTable {
                 "Dokument (PESEL/DNI)"
             };
             
+            // Konwersja listy wyników na macierz obiektów akceptowaną przez JTable
             Object[][] data = new Object[results.size()][5];
 
             for (int i = 0; i < results.size(); i++) {
                 Object[] row = results.get(i);
-                data[i][0] = row[0]; // a.aId (Kolumna 0)
-                data[i][1] = row[1]; // a.aName
-                data[i][2] = row[2]; // c.mNum (Kolumna 2 - Klucz główny klienta)
-                data[i][3] = row[3]; // c.mName
-                data[i][4] = row[4]; // c.mId
+                data[i][0] = row[0]; // ID Aktywności
+                data[i][1] = row[1]; // Nazwa Aktywności
+                data[i][2] = row[2]; // Klucz główny klienta (mNum)
+                data[i][3] = row[3]; // Imię i nazwisko
+                data[i][4] = row[4]; // PESEL/DNI
             }
 
+            // Aktualizacja nagłówka i danych w GUI
             view.setViewName("Lista Zapisów (Zarządzanie)");
             view.setTableData(columnNames, data);
 
@@ -64,11 +75,13 @@ public class PerformsControllerTable {
     }
 
     /**
-     * Pobiera ID Aktywności z zaznaczonego wiersza (Kolumna 0).
+     * Pobiera ID Aktywności z aktualnie zaznaczonego wiersza w tabeli.
+     * @return ID aktywności (String) lub null, jeśli nic nie wybrano.
      */
     public String getSelectedActivityId() {
         int viewRow = view.dataTable.getSelectedRow();
         if (viewRow != -1) {
+            // Konwersja indeksu widoku na model (ważne przy sortowaniu/filtrowaniu tabeli)
             int modelRow = view.dataTable.convertRowIndexToModel(viewRow);
             return (String) view.dataTable.getModel().getValueAt(modelRow, 0);
         }
@@ -76,7 +89,8 @@ public class PerformsControllerTable {
     }
 
     /**
-     * Pobiera Numer Klienta (PK) z zaznaczonego wiersza (Kolumna 2).
+     * Pobiera Numer Klienta (PK) z zaznaczonego wiersza w tabeli.
+     * @return Numer klienta (String) lub null.
      */
     public String getSelectedClientNum() {
         int viewRow = view.dataTable.getSelectedRow();
@@ -87,12 +101,11 @@ public class PerformsControllerTable {
         return null;
     }
     
-    
-      // --- NOWE METODY DLA PERFORMS ---
     /**
-     * Usuwa relację (wypisuje klienta z aktywności).
+     * Usuwa relację między wybranym klientem a aktywnością.
+     * Działa poprzez usunięcie obiektu klienta z kolekcji Set w obiekcie Activity.
      */
-   public void deletePerforms() {
+    public void deletePerforms() {
         String actId = getSelectedActivityId();
         String clientNum = getSelectedClientNum();
 
@@ -112,14 +125,16 @@ public class PerformsControllerTable {
                 session = sessionFactory.openSession();
                 tr = session.beginTransaction();
 
+                // Pobranie pełnych encji z bazy danych
                 Activity activity = session.find(Activity.class, actId);
                 Client client = session.find(Client.class, clientNum);
 
                 if (activity != null && client != null) {
-                    // Usuwamy klienta z setu aktywności (Hibernate sam usunie wpis w tabeli łączącej PERFORMS)
+                    // W relacjach Many-to-Many zarządzanych przez Hibernate, 
+                    // usunięcie elementu z Set-a i wykonanie merge usuwa wpis w tabeli pośredniczącej.
                     if (activity.getClientSet().contains(client)) {
                         activity.getClientSet().remove(client);
-                        session.merge(activity);
+                        session.merge(activity); 
                         tr.commit();
                         JOptionPane.showMessageDialog(view, "Wypisano pomyślnie.");
                     } else {
@@ -127,26 +142,21 @@ public class PerformsControllerTable {
                     }
                 }
             } catch (Exception e) {
-                if (tr != null) {
-                    tr.rollback();
-                }
+                if (tr != null) tr.rollback();
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(view, "Błąd usuwania relacji: " + e.getMessage());
             } finally {
-                if (session != null) {
-                    session.close();
-                }
-                // Odśwież tabelę
-                showPerforms();
+                if (session != null) session.close();
+                showPerforms(); // Odświeżenie tabeli po operacji
             }
         }
     }
 
     /**
-     * Edytuje relację (zmienia aktywność dla klienta). Działa to na zasadzie:
-     * Usuń stare powiązanie -> Dodaj nowe.
+     * Edytuje relację: zmienia aktywność, do której przypisany jest dany klient.
+     * Proces: Pobierz listę aktywności -> Wyświetl wybór -> Usuń stare powiązanie -> Dodaj nowe.
      */
-   public void editPerforms() {
+    public void editPerforms() {
         String oldActId = getSelectedActivityId();
         String clientNum = getSelectedClientNum();
 
@@ -155,32 +165,32 @@ public class PerformsControllerTable {
             return;
         }
 
-        // 1. Pobieramy listę wszystkich dostępnych aktywności
+        // 1. Pobranie listy dostępnych aktywności, aby użytkownik mógł wybrać nową
         Session session = sessionFactory.openSession();
         List<Activity> activities = activityDAO.findAllActivities(session);
         session.close();
 
-        // 2. Tworzymy tablicę samych nazw (Stringów) do wyświetlenia w oknie
+        // 2. Przygotowanie tablicy nazw do wyświetlenia w oknie dialogowym (ComboBox)
         String[] activityNames = new String[activities.size()];
         for (int i = 0; i < activities.size(); i++) {
             activityNames[i] = activities.get(i).getAName();
         }
 
-        // 3. Wyświetlamy okno z listą nazw
+        // 3. Wyświetlenie okna wyboru (input dialog)
         String selectedName = (String) JOptionPane.showInputDialog(
                 view,
                 "Wybierz nowe zajęcia dla klienta:",
                 "Zmiana zajęć",
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                activityNames, // Przekazujemy tablicę Stringów
+                activityNames,
                 null
         );
 
-        // 4. Jeśli użytkownik coś wybrał (nie kliknął Anuluj)
+        // 4. Jeśli użytkownik wybrał nową aktywność
         if (selectedName != null) {
 
-            // Szukamy obiektu Activity, który pasuje do wybranej nazwy
+            // Znalezienie obiektu Activity odpowiadającego wybranej nazwie
             Activity newActivity = null;
             for (Activity a : activities) {
                 if (a.getAName().equals(selectedName)) {
@@ -189,10 +199,10 @@ public class PerformsControllerTable {
                 }
             }
 
-            // Jeśli znaleziono (zawsze powinno znaleźć) i jest to inna aktywność niż obecna
             if (newActivity != null) {
+                // Sprawdzenie, czy użytkownik nie wybrał tej samej aktywności, która już jest przypisana
                 if (newActivity.getAId().equals(oldActId)) {
-                    return; // To ta sama aktywność, nic nie robimy
+                    return; 
                 }
 
                 Session sess = null;
@@ -201,17 +211,17 @@ public class PerformsControllerTable {
                     sess = sessionFactory.openSession();
                     tr = sess.beginTransaction();
 
-                    // Używamy .find() zamiast przestarzałego .get()
+                    // Pobranie obiektów w bieżącej sesji
                     Activity oldActivityEntity = sess.find(Activity.class, oldActId);
                     Activity newActivityEntity = sess.find(Activity.class, newActivity.getAId());
                     Client clientEntity = sess.find(Client.class, clientNum);
 
                     if (oldActivityEntity != null && newActivityEntity != null && clientEntity != null) {
-                        // A. Usuń ze starej
+                        // KROK A: Usunięcie klienta ze starej aktywności
                         oldActivityEntity.getClientSet().remove(clientEntity);
                         sess.merge(oldActivityEntity);
 
-                        // B. Dodaj do nowej
+                        // KROK B: Dodanie klienta do nowej aktywności
                         newActivityEntity.getClientSet().add(clientEntity);
                         sess.merge(newActivityEntity);
 
@@ -219,20 +229,14 @@ public class PerformsControllerTable {
                         JOptionPane.showMessageDialog(view, "Zmieniono zajęcia na: " + newActivity.getAName());
                     }
                 } catch (Exception e) {
-                    if (tr != null) {
-                        tr.rollback();
-                    }
+                    if (tr != null) tr.rollback();
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(view, "Błąd edycji: " + e.getMessage());
                 } finally {
-                    if (sess != null) {
-                        sess.close();
-                    }
-                    showPerforms();
+                    if (sess != null) sess.close();
+                    showPerforms(); // Odświeżenie tabeli
                 }
             }
         }
     }
-    
-    
 }
